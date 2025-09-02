@@ -1,32 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Calendar, Users, DollarSign, Clock } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [selectedTab, setSelectedTab] = useState('appointments');
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const appointments = [
-    {
-      id: 1,
-      name: 'John Doe',
-      date: '2024-03-15',
-      time: '10:00 AM',
-      status: 'Confirmed',
-      type: 'Video Call',
-    },
-    // Add more appointments as needed
-  ];
-
-  const payments = [
-    {
-      id: 1,
-      name: 'John Doe',
-      amount: 80,
-      date: '2024-03-15',
-      status: 'Paid',
-      method: 'Credit Card',
-    },
-    // Add more payments as needed
-  ];
+  useEffect(() => {
+    const fetchBookings = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await axios.get('http://localhost:5000/bookings');
+        setAppointments(res.data.bookings || []);
+      } catch (err: any) {
+        setError('Failed to fetch bookings');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBookings();
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -86,21 +82,13 @@ export default function AdminDashboard() {
           <nav className="flex -mb-px">
             <button
               onClick={() => setSelectedTab('appointments')}
-              className={`px-6 py-3 text-sm font-medium ${
-                selectedTab === 'appointments'
-                  ? 'border-b-2 border-purple-600 text-purple-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              className={`px-6 py-3 text-sm font-medium ${selectedTab === 'appointments' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500 hover:text-gray-700'}`}
             >
               Appointments
             </button>
             <button
               onClick={() => setSelectedTab('payments')}
-              className={`px-6 py-3 text-sm font-medium ${
-                selectedTab === 'payments'
-                  ? 'border-b-2 border-purple-600 text-purple-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              className={`px-6 py-3 text-sm font-medium ${selectedTab === 'payments' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500 hover:text-gray-700'}`}
             >
               Payments
             </button>
@@ -110,98 +98,45 @@ export default function AdminDashboard() {
         <div className="p-6">
           {selectedTab === 'appointments' ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Client
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Time
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Type
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {appointments.map((appointment) => (
-                    <tr key={appointment.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {appointment.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {appointment.date}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {appointment.time}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                          {appointment.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {appointment.type}
-                      </td>
+              {loading ? (
+                <div className="text-center py-8">Loading...</div>
+              ) : error ? (
+                <div className="text-center text-red-500 py-8">{error}</div>
+              ) : (
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Client</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Phone</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Email</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Language</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Concern</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Time</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Coupon</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {appointments.map((booking: any) => (
+                      <tr key={booking.id} className="hover:bg-gray-100">
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{booking.fullname || booking.fullName}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700">{booking.phonenumber || booking.phoneNumber}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700">{booking.email}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700">{booking.statuss}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700">{booking.language}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700">{booking.concern}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700">{booking.date}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700">{booking.time}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700">{booking.couponcode || booking.couponCode}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Client
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Method
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {payments.map((payment) => (
-                    <tr key={payment.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {payment.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        ${payment.amount}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {payment.date}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                          {payment.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {payment.method}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <div className="text-center py-8 text-gray-400 text-lg">No payments data yet.</div>
           )}
         </div>
       </div>

@@ -1,10 +1,16 @@
-const express = require('express')
-const dotenv = require('dotenv')
-const cors = require('cors')
-const bcrypt = require('bcrypt')
+import { response } from 'express';
+import bcrypt from 'bcrypt';
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import pg from 'pg';
+// const express = require('express')
+// const dotenv = require('dotenv')
+// const cors = require('cors')
+// const bcrypt = require('bcrypt')
 dotenv.config()
 const app = express()
-const pg = require('pg')
+// const pg = require('pg')
 const { Pool } = pg;
 app.use(express.json());
 app.use(cors());
@@ -65,6 +71,44 @@ app.post("/login", async (req, res) => {
 
 
 })
+
+app.get("/bookings", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM bookings ORDER BY date DESC, time DESC");
+    res.json({ bookings: result.rows });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to fetch bookings" });
+  }
+});
+
+app.post("/book", async (req, res) => {
+  const {
+    fullName,
+    phoneNumber,
+    email,
+    statuss,
+    language,
+    concern,
+    date,
+    time,
+    couponCode, } = req.body;
+
+  try {
+    const result = await pool.query(
+      "INSERT INTO bookings (fullName, phoneNumber, email, statuss, language, concern, date, time, couponCode) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+      [fullName, phoneNumber, email, statuss, language, concern, date, time, couponCode]
+    );
+
+    res.json({ message: "Booking successful", booking: result.rows[0] });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Booking failed" });
+  }
+})
+
+
 
 
 

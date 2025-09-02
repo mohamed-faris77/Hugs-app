@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -10,16 +11,29 @@ const SignIn = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const userLogin = useAuthStore(state => state.userLogin);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    if (localStorage.getItem('isAdmin') === 'true') {
+      setError('Please logout the admin before user login.');
+      setLoading(false);
+      return;
+    }
     try {
       const res = await axios.post('http://localhost:5000/login', { username, password });
       if (res.data && res.data.user) {
         localStorage.setItem('username', res.data.user.username);
         window.dispatchEvent(new Event('usernameChanged'));
-        navigate('/');
+        userLogin();
+        const redirect = localStorage.getItem('redirectAfterLogin');
+        if (redirect) {
+          localStorage.removeItem('redirectAfterLogin');
+          navigate(redirect);
+        } else {
+          navigate('/');
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Login failed');

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useAuthStore } from '../store/authStore';
+import axios from 'axios';
 import { Calendar, Clock, Video, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
@@ -52,6 +54,9 @@ const validCoupons = {
 };
 
 export default function Booking() {
+  const { isUserLoggedIn } = useAuthStore();
+  // Only use isUserLoggedIn for authentication check
+  const isActuallyLoggedIn = isUserLoggedIn && !!localStorage.getItem('username');
   const navigate = useNavigate();
   const [formData, setFormData] = useState<BookingForm>({
     name: '',
@@ -66,15 +71,19 @@ export default function Booking() {
   });
 
   const [discount, setDiscount] = useState(0);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [submitError, setSubmitError] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+
     // Validation for name (only letters and spaces)
     if (name === 'name' && !/^[A-Za-z\s]*$/.test(value)) {
       return;
     }
-    
+
     // Validation for phone (only numbers)
     if (name === 'phone' && !/^\d*$/.test(value)) {
       return;
@@ -92,14 +101,51 @@ export default function Booking() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+    if (!formData.name.trim()) newErrors.name = 'Name is required.';
+    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required.';
+    else if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = 'Phone number must be 10 digits.';
+    if (!formData.language) newErrors.language = 'Language is required.';
+    if (!formData.problem) newErrors.problem = 'Problem is required.';
+    if (!formData.currentStatus) newErrors.currentStatus = 'Status is required.';
+    if (!formData.date) newErrors.date = 'Date is required.';
+    if (!formData.time) newErrors.time = 'Time is required.';
+    return newErrors;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/payment', { 
-      state: { 
-        bookingData: formData,
-        discount: discount 
-      } 
-    });
+    setSubmitError('');
+    setSubmitSuccess('');
+    const validationErrors = validateForm();
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
+    if (!isActuallyLoggedIn) {
+      setShowAuthModal(true);
+      setSubmitSuccess('');
+      return;
+    }
+    // Only store booking and navigate if signed in
+    try {
+      const res = await axios.post('http://localhost:5000/book', {
+        fullName: formData.name,
+        phoneNumber: formData.phone,
+        email: formData.email,
+        statuss: formData.currentStatus,
+        language: formData.language,
+        concern: formData.problem,
+        date: formData.date,
+        time: formData.time,
+        couponCode: formData.couponCode
+      });
+      if (res.data && res.data.booking && isActuallyLoggedIn) {
+        setSubmitSuccess('');
+        navigate('/payment', { state: { bookingData: formData, discount } });
+      }
+    } catch (err: any) {
+      setSubmitError(err.response?.data?.error || 'Booking failed');
+    }
   };
 
   return (
@@ -109,6 +155,36 @@ export default function Booking() {
       exit={{ opacity: 0 }}
       className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8"
     >
+
+      {/* Auth Modal for unauthenticated users */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
+            <h2 className="text-xl font-bold mb-4">Sign In Required</h2>
+            <p className="mb-6">Please sign in or register to continue booking.</p>
+            <div className="flex gap-4 justify-center">
+              <button
+                className="bg-primary text-white px-4 py-2 rounded"
+                onClick={() => { setShowAuthModal(false); localStorage.setItem('redirectAfterLogin', '/booking'); navigate('/signin'); }}
+              >
+                Sign In
+              </button>
+              <button
+                className="bg-secondary text-primary px-4 py-2 rounded border border-primary"
+                onClick={() => { setShowAuthModal(false); localStorage.setItem('redirectAfterLogin', '/booking'); navigate('/signup'); }}
+              >
+                Register
+              </button>
+            </div>
+            <button
+              className="mt-6 text-gray-500 underline"
+              onClick={() => setShowAuthModal(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <div>
           <h1 className="text-3xl font-bold text-primary">Book Your Session</h1>
@@ -132,6 +208,7 @@ export default function Booking() {
                   placeholder="Enter your full name"
                   pattern="[A-Za-z\s]+"
                 />
+                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
 
               <div>
@@ -148,6 +225,7 @@ export default function Booking() {
                   placeholder="Enter your phone number"
                   pattern="\d+"
                 />
+                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
               </div>
 
               <div>
@@ -174,6 +252,7 @@ export default function Booking() {
                   className="mt-1"
                   placeholder="Select your current status"
                 />
+                {errors.currentStatus && <p className="text-red-500 text-xs mt-1">{errors.currentStatus}</p>}
               </div>
 
               <div>
@@ -186,6 +265,7 @@ export default function Booking() {
                   className="mt-1"
                   placeholder="Select your preferred language"
                 />
+                {errors.language && <p className="text-red-500 text-xs mt-1">{errors.language}</p>}
               </div>
 
               <div>
@@ -198,6 +278,7 @@ export default function Booking() {
                   className="mt-1"
                   placeholder="Select your concern"
                 />
+                {errors.problem && <p className="text-red-500 text-xs mt-1">{errors.problem}</p>}
               </div>
 
               <div>
@@ -213,6 +294,7 @@ export default function Booking() {
                   className="mt-1 input-field"
                   min={new Date().toISOString().split('T')[0]}
                 />
+                {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date}</p>}
               </div>
 
               <div>
@@ -225,17 +307,17 @@ export default function Booking() {
                       key={time}
                       type="button"
                       onClick={() => setFormData({ ...formData, time })}
-                      className={`flex items-center justify-center px-4 py-2 border rounded-md ${
-                        formData.time === time
-                          ? 'bg-primary text-white border-primary'
-                          : 'border-gray-300 text-gray-700 hover:border-primary'
-                      }`}
+                      className={`flex items-center justify-center px-4 py-2 border rounded-md ${formData.time === time
+                        ? 'bg-primary text-white border-primary'
+                        : 'border-gray-300 text-gray-700 hover:border-primary'
+                        }`}
                     >
                       <Clock className="h-4 w-4 mr-2" />
                       {time}
                     </button>
                   ))}
                 </div>
+                {errors.time && <p className="text-red-500 text-xs mt-1">{errors.time}</p>}
               </div>
 
               <div>
@@ -276,17 +358,19 @@ export default function Booking() {
                   <div className="flex items-center text-gray-600">
                     <CreditCard className="h-5 w-5 mr-2" />
                     <span>
-                      {discount > 0 
+                      {discount > 0
                         ? <span>
-                            <span className="line-through">Rs 100</span>
-                            {' '}${80 - (80 * discount / 100)}
-                          </span>
+                          <span className="line-through">Rs 100</span>
+                          {' '}${80 - (80 * discount / 100)}
+                        </span>
                         : '100'} per session
                     </span>
                   </div>
                 </div>
               </div>
 
+              {submitError && <p className="text-red-500 text-sm mb-2">{submitError}</p>}
+              {submitSuccess && <p className="text-green-500 text-sm mb-2">{submitSuccess}</p>}
               <button
                 type="submit"
                 className="w-full bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors"

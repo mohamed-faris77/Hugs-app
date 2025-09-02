@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -11,6 +12,7 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const userLogin = useAuthStore(state => state.userLogin);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -20,7 +22,14 @@ const SignUp = () => {
       const res = await axios.post('http://localhost:5000/register', { username, password });
       if (res.data && res.data.message) {
         setSuccess('Registration successful! You can now sign in.');
-        setTimeout(() => navigate('/signin'), 1500);
+        userLogin();
+        const redirect = localStorage.getItem('redirectAfterLogin');
+        if (redirect) {
+          localStorage.removeItem('redirectAfterLogin');
+          setTimeout(() => navigate(redirect), 1500);
+        } else {
+          setTimeout(() => navigate('/'), 1500);
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Registration failed');

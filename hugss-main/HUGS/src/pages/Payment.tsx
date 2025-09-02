@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CreditCard, Lock, Phone } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useAuthStore } from '../store/authStore';
 
 const UPI_APPS = [
   { id: 'gpay', name: 'Google Pay', icon: '🔵' },
@@ -14,6 +15,7 @@ export default function Payment() {
   const navigate = useNavigate();
   const bookingData = location.state?.bookingData;
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const { isUserLoggedIn, isAdmin } = useAuthStore();
 
   const [paymentData, setPaymentData] = useState({
     cardNumber: '',
@@ -32,8 +34,8 @@ export default function Payment() {
     try {
       // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 1500));
-      navigate('/payment-success', { 
-        state: { 
+      navigate('/payment-success', {
+        state: {
           bookingData,
           paymentMethod,
           transactionId: Math.random().toString(36).substring(7)
@@ -44,8 +46,13 @@ export default function Payment() {
     }
   };
 
+  // Restrict access to payment page
   if (!bookingData) {
     navigate('/booking');
+    return null;
+  }
+  if (!isUserLoggedIn && !isAdmin) {
+    navigate('/signin');
     return null;
   }
 
@@ -72,18 +79,16 @@ export default function Payment() {
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => setPaymentMethod('card')}
-              className={`p-4 border rounded-lg flex items-center justify-center ${
-                paymentMethod === 'card' ? 'border-purple-600 bg-purple-50' : 'border-gray-200'
-              }`}
+              className={`p-4 border rounded-lg flex items-center justify-center ${paymentMethod === 'card' ? 'border-purple-600 bg-purple-50' : 'border-gray-200'
+                }`}
             >
               <CreditCard className="h-5 w-5 mr-2" />
               <span>Card Payment</span>
             </button>
             <button
               onClick={() => setPaymentMethod('upi')}
-              className={`p-4 border rounded-lg flex items-center justify-center ${
-                paymentMethod === 'upi' ? 'border-purple-600 bg-purple-50' : 'border-gray-200'
-              }`}
+              className={`p-4 border rounded-lg flex items-center justify-center ${paymentMethod === 'upi' ? 'border-purple-600 bg-purple-50' : 'border-gray-200'
+                }`}
             >
               <Phone className="h-5 w-5 mr-2" />
               <span>UPI Payment</span>

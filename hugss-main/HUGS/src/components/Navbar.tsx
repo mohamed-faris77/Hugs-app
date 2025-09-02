@@ -8,7 +8,7 @@ import { useAuthStore } from '../store/authStore';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { isAdmin } = useAuthStore();
+  const { isAdmin, logout, userLogout } = useAuthStore();
   const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,6 +68,12 @@ export default function Navbar() {
             <Link to="/feedback" className="text-white hover:text-secondary px-3 py-2 transition-colors">
               Feedback
             </Link>
+            {/* Only show Sign In if not admin and not user */}
+            {!isAdmin && !username ? (
+              <Link to="/signin" className="text-white hover:text-secondary px-3 py-2 transition-colors">
+                Sign In
+              </Link>
+            ) : null}
             {username ? (
               <div className="flex items-center space-x-2">
                 <span className="text-white font-medium">{username}</span>
@@ -81,6 +87,22 @@ export default function Navbar() {
                   className="ml-2 px-2 py-1 bg-secondary text-white rounded hover:bg-secondary-dark text-sm"
                   onClick={() => {
                     localStorage.removeItem('username');
+                    userLogout();
+                    window.location.reload();
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            ) : null}
+            <ThemeToggle />
+            {isAdmin ? (
+              <div className="flex items-center space-x-2">
+                <AdminIcon />
+                <button
+                  className="px-4 py-2 bg-secondary text-white rounded hover:bg-secondary-dark text-sm"
+                  onClick={() => {
+                    logout();
                     window.location.reload();
                   }}
                 >
@@ -88,12 +110,8 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <Link to="/signin" className="text-white hover:text-secondary px-3 py-2 transition-colors">
-                Sign In
-              </Link>
+              <AdminIcon />
             )}
-            <ThemeToggle />
-            <AdminIcon />
           </div>
 
           {/* Mobile Menu Button */}

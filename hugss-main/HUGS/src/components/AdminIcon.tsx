@@ -12,9 +12,13 @@ export default function AdminIcon() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    if (localStorage.getItem('username')) {
+      toast.error('Please logout the user before admin login.');
+      return;
+    }
     if (login(password)) {
       setShowDialog(false);
-      setPassword('');
+      setPassword('admin123');
       navigate('/admin');
       toast.success('Welcome, Admin!');
     } else {
