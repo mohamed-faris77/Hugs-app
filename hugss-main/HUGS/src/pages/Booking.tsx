@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
+import { useThemeStore } from '../store/themeStore';
 import axios from 'axios';
 import { Calendar, Clock, Video, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -53,11 +54,95 @@ const validCoupons = {
   'SPECIAL25': 25
 };
 
+// Custom styles for react-select with theme support
+const createSelectStyles = (isDarkMode: boolean) => ({
+  control: (provided: any, state: any) => ({
+    ...provided,
+    backgroundColor: isDarkMode ? '#374151' : '#ffffff', // gray-700 or white
+    borderColor: state.isFocused ? '#8b5cf6' : (isDarkMode ? '#4b5563' : '#d1d5db'), // gray-600 or gray-300
+    color: isDarkMode ? 'white' : '#374151', // white or gray-700
+    borderRadius: '0.375rem', // rounded-md
+    borderWidth: '1px',
+    minHeight: '2.5rem', // h-10
+    fontSize: '0.875rem', // text-sm
+    '&:hover': {
+      borderColor: '#8b5cf6',
+    },
+    boxShadow: state.isFocused ? '0 0 0 1px #8b5cf6' : 'none',
+  }),
+  menu: (provided: any) => ({
+    ...provided,
+    backgroundColor: isDarkMode ? '#374151' : '#ffffff', // gray-700 or white
+    border: `1px solid ${isDarkMode ? '#4b5563' : '#d1d5db'}`, // gray-600 or gray-300
+    borderRadius: '0.375rem', // rounded-md
+    marginTop: '0.25rem',
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+    zIndex: 9999,
+  }),
+  menuList: (provided: any) => ({
+    ...provided,
+    padding: '0.25rem',
+  }),
+  option: (provided: any, state: any) => ({
+    ...provided,
+    backgroundColor: state.isSelected
+      ? '#8b5cf6' // purple-500
+      : state.isFocused
+        ? (isDarkMode ? '#4b5563' : '#f3f4f6') // gray-600 or gray-100
+        : (isDarkMode ? '#374151' : '#ffffff'), // gray-700 or white
+    color: state.isSelected ? 'white' : (isDarkMode ? 'white' : '#374151'), // white or gray-700
+    cursor: 'pointer',
+    padding: '0.5rem 0.75rem',
+    fontSize: '0.875rem', // text-sm
+    '&:hover': {
+      backgroundColor: isDarkMode ? '#4b5563' : '#f3f4f6', // gray-600 or gray-100
+    },
+    '&:active': {
+      backgroundColor: '#8b5cf6', // purple-500
+    },
+  }),
+  singleValue: (provided: any) => ({
+    ...provided,
+    color: isDarkMode ? 'white' : '#374151', // white or gray-700
+    fontSize: '0.875rem', // text-sm
+  }),
+  placeholder: (provided: any) => ({
+    ...provided,
+    color: isDarkMode ? '#9ca3af' : '#6b7280', // gray-400 or gray-500
+    fontSize: '0.875rem', // text-sm
+  }),
+  input: (provided: any) => ({
+    ...provided,
+    color: isDarkMode ? 'white' : '#374151', // white or gray-700
+    fontSize: '0.875rem', // text-sm
+  }),
+  indicatorSeparator: (provided: any) => ({
+    ...provided,
+    backgroundColor: isDarkMode ? '#4b5563' : '#d1d5db', // gray-600 or gray-300
+  }),
+  dropdownIndicator: (provided: any, state: any) => ({
+    ...provided,
+    color: state.isFocused ? '#8b5cf6' : (isDarkMode ? '#9ca3af' : '#6b7280'), // gray-400 or gray-500
+    '&:hover': {
+      color: '#8b5cf6',
+    },
+  }),
+  clearIndicator: (provided: any) => ({
+    ...provided,
+    color: isDarkMode ? '#9ca3af' : '#6b7280', // gray-400 or gray-500
+    '&:hover': {
+      color: isDarkMode ? '#6b7280' : '#374151', // gray-500 or gray-700
+    },
+  }),
+});
+
 export default function Booking() {
   const { isUserLoggedIn } = useAuthStore();
+  const { isDarkMode } = useThemeStore();
   // Only use isUserLoggedIn for authentication check
   const isActuallyLoggedIn = isUserLoggedIn && !!localStorage.getItem('username');
   const navigate = useNavigate();
+  const customSelectStyles = createSelectStyles(isDarkMode);
   const [formData, setFormData] = useState<BookingForm>({
     name: '',
     phone: '',
@@ -153,15 +238,15 @@ export default function Booking() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8"
+      className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900 min-h-screen"
     >
 
       {/* Auth Modal for unauthenticated users */}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
-            <h2 className="text-xl font-bold mb-4">Sign In Required</h2>
-            <p className="mb-6">Please sign in or register to continue booking.</p>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Sign In Required</h2>
+            <p className="mb-6 text-gray-700 dark:text-gray-300">Please sign in or register to continue booking.</p>
             <div className="flex gap-4 justify-center">
               <button
                 className="bg-primary text-white px-4 py-2 rounded"
@@ -177,7 +262,7 @@ export default function Booking() {
               </button>
             </div>
             <button
-              className="mt-6 text-gray-500 underline"
+              className="mt-6 text-gray-500 dark:text-gray-400 underline"
               onClick={() => setShowAuthModal(false)}
             >
               Cancel
@@ -187,15 +272,15 @@ export default function Booking() {
       )}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Book Your Session</h1>
-          <p className="mt-4 text-lg text-gray-600">
+          <h1 className="text-3xl font-bold text-primary dark:text-white">Book Your Session</h1>
+          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
             Fill in your details to schedule a video counseling session
           </p>
 
-          <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
+          <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Full Name *
                 </label>
                 <input
@@ -204,7 +289,7 @@ export default function Booking() {
                   required
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="mt-1 input-field"
+                  className="mt-1 input-field dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                   placeholder="Enter your full name"
                   pattern="[A-Za-z\s]+"
                 />
@@ -212,7 +297,7 @@ export default function Booking() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Phone Number *
                 </label>
                 <input
@@ -221,7 +306,7 @@ export default function Booking() {
                   required
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="mt-1 input-field"
+                  className="mt-1 input-field dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                   placeholder="Enter your phone number"
                   pattern="\d+"
                 />
@@ -229,7 +314,7 @@ export default function Booking() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Email (Optional)
                 </label>
                 <input
@@ -237,13 +322,13 @@ export default function Booking() {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="mt-1 input-field"
+                  className="mt-1 input-field dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                   placeholder="Enter your email address"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Current Status *
                 </label>
                 <Select
@@ -251,12 +336,13 @@ export default function Booking() {
                   onChange={(option) => setFormData({ ...formData, currentStatus: option?.value || '' })}
                   className="mt-1"
                   placeholder="Select your current status"
+                  styles={customSelectStyles}
                 />
                 {errors.currentStatus && <p className="text-red-500 text-xs mt-1">{errors.currentStatus}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Preferred Language *
                 </label>
                 <Select
@@ -264,12 +350,13 @@ export default function Booking() {
                   onChange={(option) => setFormData({ ...formData, language: option?.value || '' })}
                   className="mt-1"
                   placeholder="Select your preferred language"
+                  styles={customSelectStyles}
                 />
                 {errors.language && <p className="text-red-500 text-xs mt-1">{errors.language}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   What would you like to discuss? *
                 </label>
                 <Select
@@ -277,12 +364,13 @@ export default function Booking() {
                   onChange={(option) => setFormData({ ...formData, problem: option?.value || '' })}
                   className="mt-1"
                   placeholder="Select your concern"
+                  styles={customSelectStyles}
                 />
                 {errors.problem && <p className="text-red-500 text-xs mt-1">{errors.problem}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Select Date *
                 </label>
                 <input
@@ -291,14 +379,14 @@ export default function Booking() {
                   required
                   value={formData.date}
                   onChange={handleInputChange}
-                  className="mt-1 input-field"
+                  className="mt-1 input-field dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   min={new Date().toISOString().split('T')[0]}
                 />
                 {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Select Time *
                 </label>
                 <div className="mt-1 grid grid-cols-2 gap-4">
@@ -307,9 +395,9 @@ export default function Booking() {
                       key={time}
                       type="button"
                       onClick={() => setFormData({ ...formData, time })}
-                      className={`flex items-center justify-center px-4 py-2 border rounded-md ${formData.time === time
+                      className={`flex items-center justify-center px-4 py-2 border rounded-md dark:border-gray-600 dark:text-gray-300 dark:hover:border-purple-400 ${formData.time === time
                         ? 'bg-primary text-white border-primary'
-                        : 'border-gray-300 text-gray-700 hover:border-primary'
+                        : 'border-gray-300 text-gray-700 hover:border-primary dark:bg-gray-700 dark:text-gray-300'
                         }`}
                     >
                       <Clock className="h-4 w-4 mr-2" />
@@ -321,7 +409,7 @@ export default function Booking() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Coupon Code
                 </label>
                 <div className="flex gap-2">
@@ -330,37 +418,37 @@ export default function Booking() {
                     name="couponCode"
                     value={formData.couponCode}
                     onChange={handleInputChange}
-                    className="mt-1 input-field"
+                    className="mt-1 input-field dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                     placeholder="Enter coupon code"
                   />
                   <button
                     type="button"
                     onClick={validateCoupon}
-                    className="mt-1 px-4 py-2 bg-secondary text-primary rounded-md"
+                    className="mt-1 px-4 py-2 bg-secondary text-primary rounded-md hover:bg-purple-600"
                   >
                     Apply
                   </button>
                 </div>
                 {discount > 0 && (
-                  <p className="text-green-600 mt-2">
+                  <p className="text-green-600 dark:text-green-400 mt-2">
                     {discount}% discount applied!
                   </p>
                 )}
               </div>
 
-              <div className="bg-gray-50 p-4 rounded-md">
-                <h3 className="text-lg font-medium text-gray-900">Session Details</h3>
+              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Session Details</h3>
                 <div className="mt-4 space-y-2">
-                  <div className="flex items-center text-gray-600">
-                    <Video className="h-5 w-5 mr-2" />
+                  <div className="flex items-center text-gray-600 dark:text-gray-300">
+                    <Video className="h-5 w-5 mr-2 text-primary" />
                     <span>60-minute video session</span>
                   </div>
-                  <div className="flex items-center text-gray-600">
-                    <CreditCard className="h-5 w-5 mr-2" />
+                  <div className="flex items-center text-gray-600 dark:text-gray-300">
+                    <CreditCard className="h-5 w-5 mr-2 text-primary" />
                     <span>
                       {discount > 0
                         ? <span>
-                          <span className="line-through">Rs 100</span>
+                          <span className="line-through dark:text-gray-400">Rs 100</span>
                           {' '}${80 - (80 * discount / 100)}
                         </span>
                         : '100'} per session
@@ -390,9 +478,9 @@ export default function Booking() {
             alt="Counseling"
             className="rounded-lg shadow-xl"
           />
-          <div className="mt-8 bg-gray-50 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900">What to Expect</h3>
-            <ul className="mt-4 space-y-3 text-gray-600">
+          <div className="mt-8 bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">What to Expect</h3>
+            <ul className="mt-4 space-y-3 text-gray-600 dark:text-gray-300">
               <li className="flex items-start">
                 <span className="flex-shrink-0 h-6 w-6 text-primary">•</span>
                 <span>Professional and confidential environment</span>
@@ -412,16 +500,16 @@ export default function Booking() {
             </ul>
           </div>
 
-          <div className="mt-8 bg-primary/10 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-primary">Our Team</h3>
+          <div className="mt-8 bg-primary/10 dark:bg-gray-900 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-primary dark:text-white">Our Team</h3>
             <div className="mt-4 grid grid-cols-2 gap-4 text-center">
               <div>
-                <p className="text-2xl font-bold text-primary">12</p>
-                <p className="text-gray-600">Professional Counselors</p>
+                <p className="text-2xl font-bold text-primary dark:text-white">12</p>
+                <p className="text-gray-600 dark:text-gray-300">Professional Counselors</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-primary">1000+</p>
-                <p className="text-gray-600">Happy Clients</p>
+                <p className="text-2xl font-bold text-primary dark:text-white">1000+</p>
+                <p className="text-gray-600 dark:text-gray-300">Happy Clients</p>
               </div>
             </div>
           </div>

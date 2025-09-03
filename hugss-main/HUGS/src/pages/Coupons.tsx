@@ -26,10 +26,10 @@ export default function Coupons() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900 min-h-screen">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900">Student Discounts</h1>
-        <p className="mt-4 text-lg text-gray-600">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Student Discounts</h1>
+        <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
           Special offers for students and first-time clients
         </p>
       </div>

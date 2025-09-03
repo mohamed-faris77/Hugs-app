@@ -1,175 +1,185 @@
 import { useState } from 'react';
-import { Star, Send, ThumbsUp } from 'lucide-react';
+import { Send, User, Phone, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { useThemeStore } from '../store/themeStore';
 
 export default function Feedback() {
-  const [rating, setRating] = useState<number>(0);
-  const [hover, setHover] = useState<number>(0);
+  const { isDarkMode } = useThemeStore();
   const [feedback, setFeedback] = useState({
     name: '',
-    email: '',
+    phone: '',
     message: '',
-    category: 'general',
-    anonymous: false,
+    rating: '',
   });
-  const [feedbackList, setFeedbackList] = useState([]); // Store all feedback
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const newFeedback = {
-        ...feedback,
-        rating,
-        id: Date.now(), // Unique identifier
-      };
-      setFeedbackList([...feedbackList, newFeedback]); // Add to feedback list
-      setSubmitted(true);
-      toast.success('Thank you for your feedback!');
+      const response = await fetch('http://localhost:5000/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(feedback),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Feedback submitted:', data);
+
+        // Store in localStorage as backup for admin dashboard
+        const existingFeedback = localStorage.getItem('feedback_submissions');
+        const feedbackList = existingFeedback ? JSON.parse(existingFeedback) : [];
+        feedbackList.push({
+          ...feedback,
+          id: Date.now(),
+          created_at: new Date().toISOString()
+        });
+        localStorage.setItem('feedback_submissions', JSON.stringify(feedbackList));
+
+        setSubmitted(true);
+        toast.success('Thank you for your feedback!');
+      } else {
+        throw new Error('Failed to submit feedback');
+      }
     } catch (error) {
+      console.error('Feedback submission error:', error);
       toast.error('Failed to submit feedback. Please try again.');
     }
   };
 
-  const categories = [
-    { value: 'general', label: 'General Experience' },
-    { value: 'counselor', label: 'Counselor Feedback' },
-    { value: 'website', label: 'Website Experience' },
-    { value: 'suggestion', label: 'Suggestions' },
-  ];
+
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 animate-gradient-x"
+      className={`min-h-screen ${isDarkMode ? 'dark:bg-gray-900' : 'bg-gradient-to-br from-primary/5 to-secondary/5 animate-gradient-x'}`}
     >
       <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <motion.h1
-            className="text-3xl font-bold text-primary"
+            className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-primary'}`}
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5 }}
           >
             Feedback Portal
           </motion.h1>
-          <p className="mt-4 text-lg text-gray-600">
-            Share your experience and read feedback from others.
+          <p className={`mt-4 text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+            Share your experience.
           </p>
         </div>
 
-        {/* Display Feedback */}
-        <motion.div
-          className="bg-white rounded-lg shadow-lg p-6 mb-12"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          <h2 className="text-xl font-semibold text-primary mb-4">All Feedback</h2>
-          {feedbackList.length === 0 ? (
-            <p className="text-gray-600">No feedback submitted yet. Be the first!</p>
-          ) : (
-            <ul className="space-y-4">
-              {feedbackList.map((item) => (
-                <li key={item.id} className="bg-gray-100 p-4 rounded-md">
-                  <p className="text-gray-800">
-                    <strong>{item.anonymous ? 'Anonymous' : item.name || 'Anonymous'}</strong> 
-                    {` rated ${item.rating} stars`}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <strong>Category:</strong> {item.category}
-                  </p>
-                  <p className="mt-2 text-gray-700">{item.message}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </motion.div>
+
 
         {/* Feedback Form */}
         {!submitted ? (
           <motion.div
-            className="bg-white rounded-lg shadow-xl p-8"
+            className={`rounded-lg shadow-xl p-8 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Name Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Overall Rating
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <User className="h-4 w-4 inline mr-2" />
+                  Full Name *
                 </label>
-                <div className="flex items-center mt-2 space-x-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <motion.button
-                      key={star}
-                      type="button"
-                      whileHover={{ scale: 1.2 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => setRating(star)}
-                      onMouseEnter={() => setHover(star)}
-                      onMouseLeave={() => setHover(0)}
-                      className="focus:outline-none"
-                    >
-                      <Star
-                        className={`h-8 w-8 ${
-                          star <= (hover || rating)
-                            ? 'text-secondary fill-secondary'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    </motion.button>
-                  ))}
-                </div>
+                <input
+                  type="text"
+                  required
+                  value={feedback.name}
+                  onChange={(e) => setFeedback({ ...feedback, name: e.target.value })}
+                  className={`mt-1 block w-full h-12 px-4 py-3 rounded-md shadow-sm focus:ring-primary focus:border-primary text-base ${
+                    isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                      : 'border-gray-300 text-gray-900'
+                  }`}
+                  placeholder="Enter your full name"
+                />
               </div>
 
+              {/* Phone Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Category
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <Phone className="h-4 w-4 inline mr-2" />
+                  Phone Number *
                 </label>
-                <select
-                  value={feedback.category}
-                  onChange={(e) => setFeedback({ ...feedback, category: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                >
-                  {categories.map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.label}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  type="number"
+                  required
+                  value={feedback.phone}
+                  onChange={(e) => setFeedback({ ...feedback, phone: e.target.value })}
+                  className={`mt-1 block w-full h-12 px-4 py-3 rounded-md shadow-sm focus:ring-primary focus:border-primary text-base ${
+                    isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                      : 'border-gray-300 text-gray-900'
+                  }`}
+                  placeholder="Enter your phone number"
+                />
               </div>
 
+              {/* Message Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Your Feedback
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <MessageSquare className="h-4 w-4 inline mr-2" />
+                  Your Message *
                 </label>
                 <textarea
                   required
                   value={feedback.message}
                   onChange={(e) => setFeedback({ ...feedback, message: e.target.value })}
                   rows={4}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                  placeholder="Share your experience with us..."
+                  className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm focus:ring-primary focus:border-primary text-base resize-none ${
+                    isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                      : 'border-gray-300 text-gray-900'
+                  }`}
+                  placeholder="Share your feedback with us..."
                 />
               </div>
 
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="anonymous"
-                  checked={feedback.anonymous}
-                  onChange={(e) => setFeedback({ ...feedback, anonymous: e.target.checked })}
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                />
-                <label htmlFor="anonymous" className="ml-2 block text-sm text-gray-700">
-                  Submit anonymously
+              {/* Rating with Emojis */}
+              <div>
+                <label className={`block text-sm font-medium mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  How was your experience?
                 </label>
+                <div className="flex items-center justify-center space-x-8">
+                  {[
+                    { emoji: '😊', value: 'happy', label: 'Happy' },
+                    { emoji: '😐', value: 'normal', label: 'Normal' },
+                    { emoji: '😞', value: 'sad', label: 'Sad' }
+                  ].map((option) => (
+                    <motion.button
+                      key={option.value}
+                      type="button"
+                      whileHover={{ scale: 1.2 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setFeedback({ ...feedback, rating: option.value })}
+                      className={`flex flex-col items-center p-4 rounded-lg border-2 transition-all ${
+                        feedback.rating === option.value
+                          ? 'border-primary bg-primary/10'
+                          : isDarkMode
+                            ? 'border-gray-600 hover:border-gray-500'
+                            : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <span className="text-4xl mb-2">{option.emoji}</span>
+                      <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {option.label}
+                      </span>
+                    </motion.button>
+                  ))}
+                </div>
               </div>
 
+              {/* Submit Button */}
               <motion.button
                 type="submit"
                 whileHover={{ scale: 1.02 }}
@@ -185,26 +195,30 @@ export default function Feedback() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center bg-white rounded-lg shadow-xl p-12"
+            className={`text-center rounded-lg shadow-xl p-12 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}
           >
             <motion.div
-              animate={{ rotate: 360 }}
+              animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 0.5 }}
-              className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6"
+              className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6"
             >
-              <ThumbsUp className="h-8 w-8 text-green-600" />
+              <span className="text-4xl">✅</span>
             </motion.div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
               Thank You for Your Feedback!
             </h2>
-            <p className="text-gray-600 mb-8">
+            <p className={`mb-8 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               Your feedback helps us improve our services for everyone.
             </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setSubmitted(false)}
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-primary bg-primary/10 hover:bg-primary/20"
+              className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md ${
+                isDarkMode
+                  ? 'text-primary bg-primary/20 hover:bg-primary/30'
+                  : 'text-primary bg-primary/10 hover:bg-primary/20'
+              }`}
             >
               Submit Another Response
             </motion.button>

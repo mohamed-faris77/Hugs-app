@@ -41,20 +41,20 @@ export default function Resources() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900 min-h-screen">
       <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold text-gray-900">Resources</h1>
-        <p className="mt-4 text-lg text-gray-600">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Resources</h1>
+        <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
           Helpful materials to support your mental health journey
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
         {resources.map((resource) => (
-          <div key={resource.title} className="bg-white rounded-lg shadow-lg p-6">
+          <div key={resource.title} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <resource.icon className="h-8 w-8 text-purple-600 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{resource.title}</h3>
-            <p className="text-gray-600 mb-4">{resource.description}</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{resource.title}</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">{resource.description}</p>
             <a
               href={resource.link}
               className="inline-flex items-center text-purple-600 hover:text-purple-700"
@@ -68,11 +68,11 @@ export default function Resources() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {categories.map((category) => (
-          <div key={category.title} className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">{category.title}</h3>
+          <div key={category.title} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{category.title}</h3>
             <ul className="space-y-3">
               {category.resources.map((resource) => (
-                <li key={resource} className="flex items-center text-gray-600">
+                <li key={resource} className="flex items-center text-gray-600 dark:text-gray-300">
                   <span className="h-1.5 w-1.5 bg-purple-600 rounded-full mr-2"></span>
                   <a href="#" className="hover:text-purple-600">{resource}</a>
                 </li>
@@ -82,11 +82,11 @@ export default function Resources() {
         ))}
       </div>
 
-      <div className="mt-12 bg-purple-50 rounded-lg p-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+      <div className="mt-12 bg-purple-50 dark:bg-gray-700 rounded-lg p-8 text-center">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
           Need Personalized Support?
         </h2>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 dark:text-gray-300 mb-6">
           Our counselors are here to help you with your specific needs
         </p>
         <a

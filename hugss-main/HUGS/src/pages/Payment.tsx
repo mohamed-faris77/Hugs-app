@@ -57,16 +57,16 @@ export default function Payment() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-      <div className="bg-white rounded-lg shadow-lg p-8">
+    <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900 min-h-screen">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Payment Details</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payment Details</h1>
           <Lock className="h-6 w-6 text-purple-600" />
         </div>
 
-        <div className="mb-8 p-4 bg-gray-50 rounded-lg">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Booking Summary</h2>
-          <div className="space-y-2 text-gray-600">
+        <div className="mb-8 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Booking Summary</h2>
+          <div className="space-y-2 text-gray-600 dark:text-gray-300">
             <p>Date: {bookingData.date}</p>
             <p>Time: {bookingData.time}</p>
             <p>Duration: 60 minutes</p>
@@ -75,7 +75,7 @@ export default function Payment() {
         </div>
 
         <div className="mb-6">
-          <h3 className="text-lg font-medium mb-4">Select Payment Method</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Select Payment Method</h3>
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => setPaymentMethod('card')}
@@ -99,7 +99,7 @@ export default function Payment() {
         {paymentMethod === 'card' ? (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Card Number
               </label>
               <div className="mt-1 relative">
@@ -109,7 +109,7 @@ export default function Payment() {
                   required
                   value={paymentData.cardNumber}
                   onChange={handleInputChange}
-                  className="input-field pl-10"
+                  className="input-field pl-10 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   placeholder="1234 5678 9012 3456"
                   maxLength={19}
                 />
@@ -119,7 +119,7 @@ export default function Payment() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Expiry Date
                 </label>
                 <input
@@ -128,13 +128,13 @@ export default function Payment() {
                   required
                   value={paymentData.expiryDate}
                   onChange={handleInputChange}
-                  className="mt-1 input-field"
+                  className="mt-1 input-field dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   placeholder="MM/YY"
                   maxLength={5}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   CVV
                 </label>
                 <input
@@ -143,7 +143,7 @@ export default function Payment() {
                   required
                   value={paymentData.cvv}
                   onChange={handleInputChange}
-                  className="mt-1 input-field"
+                  className="mt-1 input-field dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   placeholder="123"
                   maxLength={3}
                 />
@@ -151,7 +151,7 @@ export default function Payment() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Cardholder Name
               </label>
               <input
@@ -160,7 +160,7 @@ export default function Payment() {
                 required
                 value={paymentData.name}
                 onChange={handleInputChange}
-                className="mt-1 input-field"
+                className="mt-1 input-field dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 placeholder="Enter cardholder name"
               />
             </div>
@@ -188,7 +188,7 @@ export default function Payment() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 UPI ID (Optional)
               </label>
               <input
@@ -196,7 +196,7 @@ export default function Payment() {
                 name="upiId"
                 value={paymentData.upiId}
                 onChange={handleInputChange}
-                className="mt-1 input-field"
+                className="mt-1 input-field dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 placeholder="yourname@upi"
               />
             </div>
@@ -210,7 +210,7 @@ export default function Payment() {
           </div>
         )}
 
-        <div className="mt-6 flex items-center justify-center text-sm text-gray-500">
+        <div className="mt-6 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
           <Lock className="h-4 w-4 mr-2" />
           <span>Your payment is secured with SSL encryption</span>
         </div>

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -16,14 +17,38 @@ import Contact from './pages/Contact';
 import Resources from './pages/Resources';
 import Privacy from './pages/Privacy';
 import Faculty from './pages/Faculty';
+import Feedback from './pages/Feedback';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import { useThemeStore } from './store/themeStore';
 import { useAuthStore } from './store/authStore';
 
 function App() {
-  const { isDarkMode } = useThemeStore();
+  const { isDarkMode, setTheme } = useThemeStore();
   const { isAdmin } = useAuthStore();
+
+  useEffect(() => {
+    const storedTheme = localStorage.getItem('theme-storage');
+    if (storedTheme) {
+      const parsed = JSON.parse(storedTheme);
+      if (parsed.state && typeof parsed.state.isDarkMode === 'boolean') {
+        setTheme(parsed.state.isDarkMode);
+        if (parsed.state.isDarkMode) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+    }
+  }, [setTheme]);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   return (
     <Router>
@@ -47,6 +72,7 @@ function App() {
             <Route path="/resources" element={<Resources />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/faculty" element={<Faculty />} />
+            <Route path="/feedback" element={<Feedback />} />
             <Route path ="/signin" element={<SignIn />} />
             <Route path='/signup' element={<SignUp />} />
           </Routes>

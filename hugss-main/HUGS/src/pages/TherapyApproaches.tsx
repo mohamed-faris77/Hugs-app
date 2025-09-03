@@ -29,27 +29,27 @@ export default function TherapyApproaches() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900 min-h-screen">
       <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold text-gray-900">Our Therapy Approaches</h1>
-        <p className="mt-4 text-lg text-gray-600">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Our Therapy Approaches</h1>
+        <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
           We use evidence-based therapeutic approaches tailored to your needs
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {approaches.map((approach) => (
-          <div key={approach.title} className="bg-white rounded-lg shadow-lg p-6">
+          <div key={approach.title} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <div className="flex items-center mb-4">
               <approach.icon className="h-8 w-8 text-purple-600" />
-              <h2 className="ml-3 text-xl font-semibold text-gray-900">{approach.title}</h2>
+              <h2 className="ml-3 text-xl font-semibold text-gray-900 dark:text-white">{approach.title}</h2>
             </div>
-            <p className="text-gray-600 mb-4">{approach.description}</p>
-            <div className="border-t pt-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-2">Benefits:</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">{approach.description}</p>
+            <div className="border-t dark:border-gray-600 pt-4">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Benefits:</h3>
               <ul className="space-y-2">
                 {approach.benefits.map((benefit) => (
-                  <li key={benefit} className="flex items-center text-gray-600">
+                  <li key={benefit} className="flex items-center text-gray-600 dark:text-gray-300">
                     <span className="h-1.5 w-1.5 bg-purple-600 rounded-full mr-2"></span>
                     {benefit}
                   </li>
@@ -60,11 +60,11 @@ export default function TherapyApproaches() {
         ))}
       </div>
 
-      <div className="mt-12 bg-purple-50 rounded-lg p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+      <div className="mt-12 bg-purple-50 dark:bg-gray-700 rounded-lg p-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
           Personalized Approach
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-300">
           Our therapists are trained in multiple approaches and will work with you to find the most effective treatment plan for your specific needs. We believe in a holistic approach that considers your unique circumstances, goals, and preferences.
         </p>
         <div className="mt-6">

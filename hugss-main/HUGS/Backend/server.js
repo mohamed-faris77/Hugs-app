@@ -108,10 +108,174 @@ app.post("/book", async (req, res) => {
   }
 })
 
+// Feedback endpoints
+app.post("/feedback", async (req, res) => {
+  const { name, phone, message, rating } = req.body;
+
+  try {
+    const result = await pool.query(
+      "INSERT INTO feedback (name, phone, message, rating, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *",
+      [name, phone, message, rating]
+    );
+
+    res.json({ message: "Feedback submitted successfully", feedback: result.rows[0] });
+  } catch (error) {
+    console.log("Feedback submission error:", error);
+    res.status(500).json({ error: "Failed to submit feedback" });
+  }
+});
+
+app.get("/feedback", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM feedback ORDER BY created_at DESC");
+    res.json({ feedback: result.rows });
+  } catch (error) {
+    console.log("Fetch feedback error:", error);
+    res.status(500).json({ error: "Failed to fetch feedback" });
+  }
+});
+
+app.get("/feedback/stats", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        COUNT(*) as total_feedback,
+        AVG(CASE
+          WHEN rating = 'happy' THEN 5
+          WHEN rating = 'normal' THEN 3
+          WHEN rating = 'sad' THEN 1
+          ELSE 0
+        END) as average_rating,
+        COUNT(CASE WHEN rating = 'happy' THEN 1 END) as happy_count,
+        COUNT(CASE WHEN rating = 'normal' THEN 1 END) as normal_count,
+        COUNT(CASE WHEN rating = 'sad' THEN 1 END) as sad_count
+      FROM feedback
+    `);
+
+    const stats = result.rows[0];
+    res.json({
+      totalFeedback: parseInt(stats.total_feedback),
+      averageRating: parseFloat(stats.average_rating || 0).toFixed(1),
+      ratingBreakdown: {
+        happy: parseInt(stats.happy_count),
+        normal: parseInt(stats.normal_count),
+        sad: parseInt(stats.sad_count)
+      }
+    });
+  } catch (error) {
+    console.log("Feedback stats error:", error);
+    res.status(500).json({ error: "Failed to fetch feedback statistics" });
+  }
+});
 
 
 
+
+
+// Test endpoint for feedback API
+app.get("/test-feedback", async (req, res) => {
+  console.log("🧪 Testing Feedback API Endpoints...");
+
+  const testFeedback = {
+    name: "Test User",
+    phone: "+1234567890",
+    message: "This is a test feedback message.",
+    rating: "happy"
+  };
+
+  try {
+    // Test 1: Insert test feedback
+    console.log("1️⃣ Testing feedback insertion...");
+    const insertResult = await pool.query(
+      "INSERT INTO feedback (name, phone, message, rating, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *",
+      [testFeedback.name, testFeedback.phone, testFeedback.message, testFeedback.rating]
+    );
+    console.log("✅ Test feedback inserted:", insertResult.rows[0]);
+
+    // Test 2: Fetch all feedback
+    console.log("2️⃣ Testing feedback retrieval...");
+    const fetchResult = await pool.query("SELECT * FROM feedback ORDER BY created_at DESC LIMIT 5");
+    console.log(`✅ Retrieved ${fetchResult.rows.length} feedback entries`);
+
+    // Test 3: Get feedback statistics
+    console.log("3️⃣ Testing feedback statistics...");
+    const statsResult = await pool.query(`
+      SELECT
+        COUNT(*) as total_feedback,
+        AVG(CASE
+          WHEN rating = 'happy' THEN 5
+          WHEN rating = 'normal' THEN 3
+          WHEN rating = 'sad' THEN 1
+          ELSE 0
+        END) as average_rating,
+        COUNT(CASE WHEN rating = 'happy' THEN 1 END) as happy_count,
+        COUNT(CASE WHEN rating = 'normal' THEN 1 END) as normal_count,
+        COUNT(CASE WHEN rating = 'sad' THEN 1 END) as sad_count
+      FROM feedback
+    `);
+
+    const stats = statsResult.rows[0];
+    console.log("✅ Feedback Statistics:", {
+      totalFeedback: parseInt(stats.total_feedback),
+      averageRating: parseFloat(stats.average_rating || 0).toFixed(1),
+      ratingBreakdown: {
+        happy: parseInt(stats.happy_count),
+        normal: parseInt(stats.normal_count),
+        sad: parseInt(stats.sad_count)
+      }
+    });
+
+    res.json({
+      message: "Feedback API test completed successfully",
+      testResults: {
+        inserted: insertResult.rows[0],
+        totalEntries: fetchResult.rows.length,
+        statistics: {
+          totalFeedback: parseInt(stats.total_feedback),
+          averageRating: parseFloat(stats.average_rating || 0).toFixed(1),
+          ratingBreakdown: {
+            happy: parseInt(stats.happy_count),
+            normal: parseInt(stats.normal_count),
+            sad: parseInt(stats.sad_count)
+          }
+        }
+      }
+    });
+
+  } catch (error) {
+    console.log("❌ Test failed:", error);
+    res.status(500).json({
+      error: "Feedback API test failed",
+      details: error.message
+    });
+  }
+});
+
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "Server is running",
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      feedback: {
+        POST: "/feedback - Submit feedback",
+        GET: "/feedback - Get all feedback",
+        GET_STATS: "/feedback/stats - Get feedback statistics"
+      },
+      test: {
+        GET: "/test-feedback - Run feedback API tests"
+      }
+    }
+  });
+});
 
 app.listen(5000, () => {
-  console.log("Server is running");
+  console.log("🚀 Server is running on port 5000");
+  console.log("📊 Available endpoints:");
+  console.log("  POST /feedback - Submit feedback");
+  console.log("  GET /feedback - Get all feedback");
+  console.log("  GET /feedback/stats - Get feedback statistics");
+  console.log("  GET /test-feedback - Run API tests");
+  console.log("  GET /health - Server health check");
 })

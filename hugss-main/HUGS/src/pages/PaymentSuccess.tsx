@@ -21,8 +21,8 @@ export default function PaymentSuccess() {
   );
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-      <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+    <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900 min-h-screen">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
         {/* Success Icon */}
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <Check className="h-8 w-8 text-green-600" />

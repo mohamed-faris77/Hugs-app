@@ -3,9 +3,9 @@ import { Users, Video, Shield, Award } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col dark:bg-gray-900 min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-animated text-white">
+      <section className="relative bg-gradient-animated text-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="fade-in">
@@ -36,7 +36,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-sand Beige">
+      <section className="py-20 bg-sand Beige dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center fade-in">
             <h2 className="text-3xl font-bold text-gray-900">Why Choose Us</h2>

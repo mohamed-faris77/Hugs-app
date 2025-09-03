@@ -72,15 +72,15 @@ const facultyMembers: FacultyMember[] = [
 
 export default function Faculty() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-purple/5">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-purple/5 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl font-bold text-primary mb-4">Our Faculty</h1>
-          <p className="text-lg text-gray-600">
+          <h1 className="text-4xl font-bold text-primary dark:text-white mb-4">Our Faculty</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300">
             Meet our team of experienced counselors and mental health professionals
           </p>
         </motion.div>
@@ -92,7 +92,7 @@ export default function Faculty() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.2 }}
-              className="bg-white rounded-lg shadow-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300"
             >
               <div className="relative h-64 overflow-hidden">
                 <img
@@ -109,13 +109,13 @@ export default function Faculty() {
 
               <div className="p-6">
                 <div className="mb-4">
-                  <h4 className="text-primary font-semibold mb-2 flex items-center">
+                  <h4 className="text-primary dark:text-purple-400 font-semibold mb-2 flex items-center">
                     <Award className="h-5 w-5 mr-2" />
                     Specialties
                   </h4>
                   <ul className="space-y-1">
                     {member.specialties.map((specialty, idx) => (
-                      <li key={idx} className="text-gray-600 text-sm">
+                      <li key={idx} className="text-gray-600 dark:text-gray-300 text-sm">
                         • {specialty}
                       </li>
                     ))}
@@ -123,29 +123,29 @@ export default function Faculty() {
                 </div>
 
                 <div className="mb-4">
-                  <h4 className="text-primary font-semibold mb-2 flex items-center">
+                  <h4 className="text-primary dark:text-purple-400 font-semibold mb-2 flex items-center">
                     <BookOpen className="h-5 w-5 mr-2" />
                     Education
                   </h4>
                   <ul className="space-y-1">
                     {member.education.map((edu, idx) => (
-                      <li key={idx} className="text-gray-600 text-sm">
+                      <li key={idx} className="text-gray-600 dark:text-gray-300 text-sm">
                         • {edu}
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="border-t pt-4 mt-4">
+                <div className="border-t dark:border-gray-600 pt-4 mt-4">
                   <div className="flex items-center mb-2">
-                    <Mail className="h-5 w-5 text-primary mr-2" />
-                    <a href={`mailto:${member.contact.email}`} className="text-sm text-gray-600 hover:text-primary">
+                    <Mail className="h-5 w-5 text-primary dark:text-purple-400 mr-2" />
+                    <a href={`mailto:${member.contact.email}`} className="text-sm text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-purple-400">
                       {member.contact.email}
                     </a>
                   </div>
                   <div className="flex items-center">
-                    <Phone className="h-5 w-5 text-primary mr-2" />
-                    <span className="text-sm text-gray-600">{member.contact.phone}</span>
+                    <Phone className="h-5 w-5 text-primary dark:text-purple-400 mr-2" />
+                    <span className="text-sm text-gray-600 dark:text-gray-300">{member.contact.phone}</span>
                   </div>
                 </div>
 
@@ -165,17 +165,17 @@ export default function Faculty() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="mt-16 bg-white rounded-lg shadow-xl p-8 text-center"
+          className="mt-16 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 text-center"
         >
-          <h2 className="text-2xl font-bold text-primary mb-4">Join Our Team</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold text-primary dark:text-white mb-4">Join Our Team</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
             We're always looking for passionate mental health professionals to join our team.
             If you're interested in making a difference in students' lives, we'd love to hear from you.
           </p>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-purple text-white px-8 py-3 rounded-md hover:bg-purple-dark transition-colors duration-300"
+            className="bg-purple-600 text-white px-8 py-3 rounded-md hover:bg-purple-700 transition-colors duration-300"
           >
             View Opportunities
           </motion.button>

@@ -32,22 +32,22 @@ export default function FAQ() {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900 min-h-screen">
       <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold text-gray-900">Frequently Asked Questions</h1>
-        <p className="mt-4 text-lg text-gray-600">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Frequently Asked Questions</h1>
+        <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
           Find answers to common questions about our counseling services
         </p>
       </div>
 
       <div className="space-y-4">
         {faqs.map((faq, index) => (
-          <div key={index} className="bg-white rounded-lg shadow">
+          <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow">
             <button
               className="w-full px-6 py-4 flex items-center justify-between focus:outline-none"
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
             >
-              <span className="text-left font-medium text-gray-900">{faq.question}</span>
+              <span className="text-left font-medium text-gray-900 dark:text-white">{faq.question}</span>
               {openIndex === index ? (
                 <Minus className="h-5 w-5 text-purple-600" />
               ) : (
@@ -56,18 +56,18 @@ export default function FAQ() {
             </button>
             {openIndex === index && (
               <div className="px-6 pb-4">
-                <p className="text-gray-600">{faq.answer}</p>
+                <p className="text-gray-600 dark:text-gray-300">{faq.answer}</p>
               </div>
             )}
           </div>
         ))}
       </div>
 
-      <div className="mt-12 bg-purple-50 rounded-lg p-6 text-center">
-        <h2 className="text-lg font-medium text-gray-900 mb-2">
+      <div className="mt-12 bg-purple-50 dark:bg-gray-700 rounded-lg p-6 text-center">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
           Still have questions?
         </h2>
-        <p className="text-gray-600 mb-4">
+        <p className="text-gray-600 dark:text-gray-300 mb-4">
           We're here to help. Contact us for more information.
         </p>
         <a
