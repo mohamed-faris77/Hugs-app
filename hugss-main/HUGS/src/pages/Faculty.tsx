@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { Mail, Phone, Globe, Award, BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import FAQ from './FAQ';
 
 interface FacultyMember {
   id: number;
@@ -172,14 +174,19 @@ export default function Faculty() {
             We're always looking for passionate mental health professionals to join our team.
             If you're interested in making a difference in students' lives, we'd love to hear from you.
           </p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-purple-600 text-white px-8 py-3 rounded-md hover:bg-purple-700 transition-colors duration-300"
-          >
-            View Opportunities
-          </motion.button>
+          <Link to="/join-team">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-purple-600 text-white px-8 py-3 rounded-md hover:bg-purple-700 transition-colors duration-300"
+            >
+              View Opportunities
+            </motion.button>
+          </Link>
         </motion.div>
+      </div>
+      <div>
+        <FAQ/>
       </div>
     </div>
   );

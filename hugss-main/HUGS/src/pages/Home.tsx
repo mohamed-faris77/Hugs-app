@@ -39,8 +39,8 @@ export default function Home() {
       <section className="py-20 bg-sand Beige dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center fade-in">
-            <h2 className="text-3xl font-bold text-gray-900">Why Choose Us</h2>
-            <p className="mt-4 text-lg text-gray-600">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Why Choose Us</h2>
+            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
               We provide comprehensive support tailored to your needs
             </p>
           </div>
@@ -48,32 +48,32 @@ export default function Home() {
           <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="feature-card hover:shadow-xl">
               <Users className="h-12 w-12 text-purple-600" />
-              <h3 className="mt-4 text-xl font-semibold text-gray-900">Expert Counselors</h3>
-              <p className="mt-2 text-gray-600 text-center">
+              <h3 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white">Expert Counselors</h3>
+              <p className="mt-2 text-gray-600 dark:text-gray-300 text-center">
                 Licensed professionals with years of experience
               </p>
             </div>
 
             <div className="feature-card hover:shadow-xl">
               <Video className="h-12 w-12 text-purple-600" />
-              <h3 className="mt-4 text-xl font-semibold text-gray-900">Online Sessions</h3>
-              <p className="mt-2 text-gray-600 text-center">
+              <h3 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white">Online Sessions</h3>
+              <p className="mt-2 text-gray-600 dark:text-gray-300 text-center">
                 Convenient video counseling from anywhere
               </p>
             </div>
 
             <div className="feature-card hover:shadow-xl">
               <Shield className="h-12 w-12 text-purple-600" />
-              <h3 className="mt-4 text-xl font-semibold text-gray-900">Confidential</h3>
-              <p className="mt-2 text-gray-600 text-center">
+              <h3 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white">Confidential</h3>
+              <p className="mt-2 text-gray-600 dark:text-gray-300 text-center">
                 Your privacy is our top priority
               </p>
             </div>
 
             <div className="feature-card hover:shadow-xl">
               <Award className="h-12 w-12 text-purple-600" />
-              <h3 className="mt-4 text-xl font-semibold text-gray-900">Student Discounts</h3>
-              <p className="mt-2 text-gray-600 text-center">
+              <h3 className="mt-4 text-xl font-semibold text-gray-900 dark:text-white">Student Discounts</h3>
+              <p className="mt-2 text-gray-600 dark:text-gray-300 text-center">
                 Special rates for students
               </p>
             </div>

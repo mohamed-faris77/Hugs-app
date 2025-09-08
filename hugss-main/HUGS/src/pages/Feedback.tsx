@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Send, User, Phone, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -13,6 +13,43 @@ export default function Feedback() {
     rating: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  interface FeedbackItem {
+    name: string;
+    message: string;
+    rating: string;
+  }
+  const [allFeedback, setAllFeedback] = useState<FeedbackItem[]>([]);
+
+  // Autofill name from localStorage username
+  useEffect(() => {
+    const storedUsername = localStorage.getItem('username') || '';
+    setFeedback(prev => ({ ...prev, name: storedUsername }));
+    // Listen for username changes (e.g., login/logout)
+    const handleUsernameChange = () => {
+      const updatedUsername = localStorage.getItem('username') || '';
+      setFeedback(prev => ({ ...prev, name: updatedUsername }));
+    };
+    window.addEventListener('usernameChanged', handleUsernameChange);
+    window.addEventListener('storage', handleUsernameChange);
+    return () => {
+      window.removeEventListener('usernameChanged', handleUsernameChange);
+      window.removeEventListener('storage', handleUsernameChange);
+    };
+  }, []);
+
+  // Fetch all feedbacks for display
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/feedback');
+        if (res.ok) {
+          const data = await res.json();
+          setAllFeedback(data.feedback || []);
+        }
+      } catch (e) { }
+    };
+    fetchFeedback();
+  }, [submitted]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,12 +133,12 @@ export default function Feedback() {
                   required
                   value={feedback.name}
                   onChange={(e) => setFeedback({ ...feedback, name: e.target.value })}
-                  className={`mt-1 block w-full h-12 px-4 py-3 rounded-md shadow-sm focus:ring-primary focus:border-primary text-base ${
-                    isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'border-gray-300 text-gray-900'
-                  }`}
+                  className={`mt-1 block w-full h-12 px-4 py-3 rounded-md shadow-sm focus:ring-primary focus:border-primary text-base ${isDarkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'border-gray-300 text-gray-900'
+                    }`}
                   placeholder="Enter your full name"
+                  readOnly={!!localStorage.getItem('username')}
                 />
               </div>
 
@@ -116,11 +153,10 @@ export default function Feedback() {
                   required
                   value={feedback.phone}
                   onChange={(e) => setFeedback({ ...feedback, phone: e.target.value })}
-                  className={`mt-1 block w-full h-12 px-4 py-3 rounded-md shadow-sm focus:ring-primary focus:border-primary text-base ${
-                    isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'border-gray-300 text-gray-900'
-                  }`}
+                  className={`mt-1 block w-full h-12 px-4 py-3 rounded-md shadow-sm focus:ring-primary focus:border-primary text-base ${isDarkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'border-gray-300 text-gray-900'
+                    }`}
                   placeholder="Enter your phone number"
                 />
               </div>
@@ -136,25 +172,26 @@ export default function Feedback() {
                   value={feedback.message}
                   onChange={(e) => setFeedback({ ...feedback, message: e.target.value })}
                   rows={4}
-                  className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm focus:ring-primary focus:border-primary text-base resize-none ${
-                    isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'border-gray-300 text-gray-900'
-                  }`}
+                  className={`mt-1 block w-full px-4 py-3 rounded-md shadow-sm focus:ring-primary focus:border-primary text-base resize-none ${isDarkMode
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'border-gray-300 text-gray-900'
+                    }`}
                   placeholder="Share your feedback with us..."
                 />
               </div>
 
-              {/* Rating with Emojis */}
+              {/* Rating with 5-Point Emoji Scale */}
               <div>
                 <label className={`block text-sm font-medium mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   How was your experience?
                 </label>
-                <div className="flex items-center justify-center space-x-8">
+                <div className="flex items-center justify-center space-x-4">
                   {[
-                    { emoji: '😊', value: 'happy', label: 'Happy' },
-                    { emoji: '😐', value: 'normal', label: 'Normal' },
-                    { emoji: '😞', value: 'sad', label: 'Sad' }
+                    { emoji: '😍', value: 'very_happy', label: 'Very Happy' },
+                    { emoji: '😁', value: 'happy', label: 'Happy' },
+                    { emoji: '😐', value: 'neutral', label: 'Neutral' },
+                    { emoji: '🙁', value: 'unhappy', label: 'Unhappy' },
+                    { emoji: '😓', value: 'very_unhappy', label: 'Very Unhappy' }
                   ].map((option) => (
                     <motion.button
                       key={option.value}
@@ -162,16 +199,15 @@ export default function Feedback() {
                       whileHover={{ scale: 1.2 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => setFeedback({ ...feedback, rating: option.value })}
-                      className={`flex flex-col items-center p-4 rounded-lg border-2 transition-all ${
-                        feedback.rating === option.value
-                          ? 'border-primary bg-primary/10'
-                          : isDarkMode
-                            ? 'border-gray-600 hover:border-gray-500'
-                            : 'border-gray-300 hover:border-gray-400'
-                      }`}
+                      className={`flex flex-col items-center p-3 rounded-lg border-2 transition-all ${feedback.rating === option.value
+                        ? 'border-primary bg-primary/10'
+                        : isDarkMode
+                          ? 'border-gray-600 hover:border-gray-500'
+                          : 'border-gray-300 hover:border-gray-400'
+                        }`}
                     >
-                      <span className="text-4xl mb-2">{option.emoji}</span>
-                      <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <span className="text-3xl mb-1">{option.emoji}</span>
+                      <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         {option.label}
                       </span>
                     </motion.button>
@@ -214,16 +250,43 @@ export default function Feedback() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setSubmitted(false)}
-              className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md ${
-                isDarkMode
-                  ? 'text-primary bg-primary/20 hover:bg-primary/30'
-                  : 'text-primary bg-primary/10 hover:bg-primary/20'
-              }`}
+              className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md ${isDarkMode
+                ? 'text-primary bg-primary/20 hover:bg-primary/30'
+                : 'text-primary bg-primary/10 hover:bg-primary/20'
+                }`}
             >
               Submit Another Response
             </motion.button>
           </motion.div>
         )}
+        {/* Show all feedbacks below the form */}
+        <div className="mt-12">
+          <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Recent Feedback</h2>
+          {allFeedback.length === 0 ? (
+            <div className="text-gray-400 text-center">No feedback yet.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Message</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Rating</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                  {allFeedback.map((item, idx) => (
+                    <tr key={idx} className="hover:bg-gray-100 dark:hover:bg-gray-700">
+                      <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">{item.name}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{item.message}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{item.rating}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );

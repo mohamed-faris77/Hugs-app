@@ -14,6 +14,7 @@ interface BookingForm {
   language: string;
   problem: string;
   currentStatus: string;
+  doctor: string;
   date: string;
   time: string;
   couponCode: string;
@@ -150,10 +151,18 @@ export default function Booking() {
     language: '',
     problem: '',
     currentStatus: '',
+    doctor: '',
     date: '',
     time: '',
     couponCode: ''
   });
+
+  // Static doctor list from Faculty.tsx
+  const doctorOptions = [
+    { value: 'Dr. Sarah Johnson', label: 'Dr. Sarah Johnson' },
+    { value: 'Dr. Michael Chen', label: 'Dr. Michael Chen' },
+    { value: 'Dr. Emily Williams', label: 'Dr. Emily Williams' },
+  ];
 
   const [discount, setDiscount] = useState(0);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -194,6 +203,7 @@ export default function Booking() {
     if (!formData.language) newErrors.language = 'Language is required.';
     if (!formData.problem) newErrors.problem = 'Problem is required.';
     if (!formData.currentStatus) newErrors.currentStatus = 'Status is required.';
+    if (!formData.doctor) newErrors.doctor = 'Doctor is required.';
     if (!formData.date) newErrors.date = 'Date is required.';
     if (!formData.time) newErrors.time = 'Time is required.';
     return newErrors;
@@ -218,6 +228,7 @@ export default function Booking() {
         phoneNumber: formData.phone,
         email: formData.email,
         statuss: formData.currentStatus,
+        doctor: formData.doctor,
         language: formData.language,
         concern: formData.problem,
         date: formData.date,
@@ -339,6 +350,21 @@ export default function Booking() {
                   styles={customSelectStyles}
                 />
                 {errors.currentStatus && <p className="text-red-500 text-xs mt-1">{errors.currentStatus}</p>}
+              </div>
+
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Select Doctor *
+                </label>
+                <Select
+                  options={doctorOptions}
+                  onChange={(option) => setFormData({ ...formData, doctor: option?.value || '' })}
+                  className="mt-1"
+                  placeholder="Select a doctor"
+                  styles={customSelectStyles}
+                />
+                {errors.doctor && <p className="text-red-500 text-xs mt-1">{errors.doctor}</p>}
               </div>
 
               <div>

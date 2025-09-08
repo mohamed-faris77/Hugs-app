@@ -1,3 +1,4 @@
+
 import { response } from 'express';
 import bcrypt from 'bcrypt';
 import express from 'express';
@@ -8,6 +9,7 @@ import pg from 'pg';
 // const dotenv = require('dotenv')
 // const cors = require('cors')
 // const bcrypt = require('bcrypt')
+
 dotenv.config()
 const app = express()
 // const pg = require('pg')
@@ -29,6 +31,33 @@ pool.connect().then(() => {
 }).catch((err) => {
   console.log(err);
 })
+
+// --- Contact Endpoints ---
+// Save contact form submission
+app.post("/contact", async (req, res) => {
+  const { name, email, subject, message } = req.body;
+  try {
+    const result = await pool.query(
+      "INSERT INTO contact (name, email, subject, message, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *",
+      [name, email, subject, message]
+    );
+    res.json({ message: "Contact form submitted successfully", contact: result.rows[0] });
+  } catch (error) {
+    console.log("Contact form submission error:", error);
+    res.status(500).json({ error: "Failed to submit contact form" });
+  }
+});
+
+// Get all contact submissions
+app.get("/contact", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM contact ORDER BY created_at DESC");
+    res.json({ contact: result.rows });
+  } catch (error) {
+    console.log("Fetch contact error:", error);
+    res.status(500).json({ error: "Failed to fetch contact submissions" });
+  }
+});
 
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
@@ -72,6 +101,7 @@ app.post("/login", async (req, res) => {
 
 })
 
+
 app.get("/bookings", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM bookings ORDER BY date DESC, time DESC");
@@ -82,22 +112,47 @@ app.get("/bookings", async (req, res) => {
   }
 });
 
+
+// Get total users ever registered
+app.get("/dashboard/active-clients", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT COUNT(*) AS total_users FROM users");
+    res.json({ activeClients: parseInt(result.rows[0].total_users) });
+  } catch (error) {
+    console.log("Active clients fetch error:", error);
+    res.status(500).json({ error: "Failed to fetch active clients" });
+  }
+});
+
+// Get pending bookings count
+app.get("/dashboard/pending", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT COUNT(*) AS pending_count FROM bookings WHERE LOWER(statuss) = 'pending'");
+    res.json({ pending: parseInt(result.rows[0].pending_count) });
+  } catch (error) {
+    console.log("Pending bookings fetch error:", error);
+    res.status(500).json({ error: "Failed to fetch pending bookings" });
+  }
+});
+
 app.post("/book", async (req, res) => {
   const {
     fullName,
     phoneNumber,
     email,
     statuss,
+    doctor,
     language,
     concern,
     date,
     time,
-    couponCode, } = req.body;
+    couponCode,
+  } = req.body;
 
   try {
     const result = await pool.query(
-      "INSERT INTO bookings (fullName, phoneNumber, email, statuss, language, concern, date, time, couponCode) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
-      [fullName, phoneNumber, email, statuss, language, concern, date, time, couponCode]
+      "INSERT INTO bookings (fullName, phoneNumber, email, statuss, doctor, language, concern, date, time, couponCode) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *",
+      [fullName, phoneNumber, email, statuss, doctor, language, concern, date, time, couponCode]
     );
 
     res.json({ message: "Booking successful", booking: result.rows[0] });
@@ -106,7 +161,7 @@ app.post("/book", async (req, res) => {
     console.log(error);
     res.status(500).json({ error: "Booking failed" });
   }
-})
+});
 
 // Feedback endpoints
 app.post("/feedback", async (req, res) => {
@@ -272,10 +327,4 @@ app.get("/health", (req, res) => {
 
 app.listen(5000, () => {
   console.log("🚀 Server is running on port 5000");
-  console.log("📊 Available endpoints:");
-  console.log("  POST /feedback - Submit feedback");
-  console.log("  GET /feedback - Get all feedback");
-  console.log("  GET /feedback/stats - Get feedback statistics");
-  console.log("  GET /test-feedback - Run API tests");
-  console.log("  GET /health - Server health check");
 })

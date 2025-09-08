@@ -1,5 +1,7 @@
+
 import { Heart, Mail, Phone, MapPin } from 'lucide-react';
 import { useThemeStore } from '../store/themeStore';
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
   const { isDarkMode } = useThemeStore();
@@ -10,8 +12,10 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2">
-              <Heart className="h-6 w-6 text-purple-400" />
-              <span className="text-lg font-bold">HUGS</span>
+              <Link to="/admin-login" className="flex items-center">
+                <Heart className="h-6 w-6 text-purple-400" />
+                <span className="text-lg font-bold"> HUGS</span>
+              </Link>
             </div>
             <p className="mt-2 text-gray-400">
               Professional counseling services for students and individuals.
@@ -37,9 +41,12 @@ export default function Footer() {
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider">Quick Links</h3>
             <div className="mt-4 space-y-2">
-              <p><a href="/booking" className="text-gray-400 hover:text-white">Book a Session</a></p>
-              <p><a href="/coupons" className="text-gray-400 hover:text-white">Student Discounts</a></p>
-              <p><a href="/resources" className="text-gray-400 hover:text-white">Resources</a></p>
+              <p><Link to="/" className="text-gray-400 hover:text-white">Home</Link></p>
+              <p><Link to="/booking" className="text-gray-400 hover:text-white">Book a Session</Link></p>
+              <p><Link to="/Faculty" className="text-gray-400 hover:text-white">Our Faculty</Link></p>
+              {/* <p><Link to="/resources" className="text-gray-400 hover:text-white">Resources</Link></p> */}
+              <p><Link to="/therapy-approaches" className="text-gray-400 hover:text-white">Approaches</Link></p>
+              <p><Link to="/signin" className="text-gray-400 hover:text-white">Sign In</Link></p>
             </div>
           </div>
           <div>

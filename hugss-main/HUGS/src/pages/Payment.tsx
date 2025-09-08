@@ -79,16 +79,22 @@ export default function Payment() {
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => setPaymentMethod('card')}
-              className={`p-4 border rounded-lg flex items-center justify-center ${paymentMethod === 'card' ? 'border-purple-600 bg-purple-50' : 'border-gray-200'
-                }`}
+              className={`p-4 border rounded-lg flex items-center justify-center transition-colors
+                ${paymentMethod === 'card'
+                  ? 'border-purple-600 bg-purple-50 dark:bg-purple-900 dark:border-purple-400'
+                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'}
+                text-gray-900 dark:text-white`}
             >
               <CreditCard className="h-5 w-5 mr-2" />
               <span>Card Payment</span>
             </button>
             <button
               onClick={() => setPaymentMethod('upi')}
-              className={`p-4 border rounded-lg flex items-center justify-center ${paymentMethod === 'upi' ? 'border-purple-600 bg-purple-50' : 'border-gray-200'
-                }`}
+              className={`p-4 border rounded-lg flex items-center justify-center transition-colors
+                ${paymentMethod === 'upi'
+                  ? 'border-purple-600 bg-purple-50 dark:bg-purple-900 dark:border-purple-400'
+                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'}
+                text-gray-900 dark:text-white`}
             >
               <Phone className="h-5 w-5 mr-2" />
               <span>UPI Payment</span>
@@ -179,7 +185,9 @@ export default function Payment() {
                     // Handle UPI app selection
                     toast.info(`Redirecting to ${app.name}...`);
                   }}
-                  className="p-4 border rounded-lg text-center hover:border-purple-600 hover:bg-purple-50"
+                  className="p-4 border rounded-lg text-center transition-colors
+                    hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900 dark:hover:border-purple-400
+                    border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                   <span className="text-2xl mb-2 block">{app.icon}</span>
                   <span className="text-sm">{app.name}</span>

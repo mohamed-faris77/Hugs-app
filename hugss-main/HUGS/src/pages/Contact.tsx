@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
-import emailjs from '@emailjs/browser';
+
+import axios from 'axios';
 import { toast } from 'react-toastify';
 
 export default function Contact() {
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -11,22 +13,33 @@ export default function Contact() {
     message: ''
   });
 
+  // Autofill name from localStorage username
+  useEffect(() => {
+    const storedUsername = localStorage.getItem('username') || '';
+    setFormData(prev => ({ ...prev, name: storedUsername }));
+    // Listen for username changes (e.g., login/logout)
+    const handleUsernameChange = () => {
+      const updatedUsername = localStorage.getItem('username') || '';
+      setFormData(prev => ({ ...prev, name: updatedUsername }));
+    };
+    window.addEventListener('usernameChanged', handleUsernameChange);
+    window.addEventListener('storage', handleUsernameChange);
+    return () => {
+      window.removeEventListener('usernameChanged', handleUsernameChange);
+      window.removeEventListener('storage', handleUsernameChange);
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await emailjs.send(
-        'YOUR_SERVICE_ID',
-        'YOUR_TEMPLATE_ID',
-        {
-          from_name: formData.name,
-          from_email: formData.email,
-          subject: formData.subject,
-          message: formData.message
-        },
-        'YOUR_PUBLIC_KEY'
-      );
-      toast.success('Message sent successfully!');
-      setFormData({ name: '', email: '', subject: '', message: '' });
+      const res = await axios.post('http://localhost:5000/contact', formData);
+      if (res.data && res.data.message) {
+        toast.success('Message sent successfully!');
+        setFormData(prev => ({ ...prev, subject: '', message: '' }));
+      } else {
+        toast.error('Failed to send message. Please try again.');
+      }
     } catch (error) {
       toast.error('Failed to send message. Please try again.');
     }
@@ -99,6 +112,8 @@ export default function Contact() {
                 value={formData.name}
                 onChange={handleChange}
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
+                autoComplete="name"
+                readOnly={!!localStorage.getItem('username')}
               />
             </div>
             <div>

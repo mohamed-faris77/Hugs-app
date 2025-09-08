@@ -18,10 +18,13 @@ import Resources from './pages/Resources';
 import Privacy from './pages/Privacy';
 import Faculty from './pages/Faculty';
 import Feedback from './pages/Feedback';
+import JoinTeam from './pages/JoinTeam';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import { useThemeStore } from './store/themeStore';
 import { useAuthStore } from './store/authStore';
+import AdminLogin from './pages/AdminLogin';
+import AppointmentDetails from './pages/AppointmentDetails';
 
 function App() {
   const { isDarkMode, setTheme } = useThemeStore();
@@ -62,9 +65,14 @@ function App() {
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/coupons" element={<Coupons />} />
             <Route
-              path="/admin"
-              element={isAdmin ? <AdminDashboard /> : <Navigate to="/" replace />}
+              path="/admin-login"
+              element={<AdminLogin />}
             />
+            <Route
+              path="/admin"
+              element={<AdminDashboard />}
+            />
+            <Route path="/appointment-details" element={<AppointmentDetails />} />
             <Route path="/therapy-approaches" element={<TherapyApproaches />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/blog" element={<Blog />} />
@@ -73,8 +81,9 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/faculty" element={<Faculty />} />
             <Route path="/feedback" element={<Feedback />} />
-            <Route path ="/signin" element={<SignIn />} />
+            <Route path="/signin" element={<SignIn />} />
             <Route path='/signup' element={<SignUp />} />
+            <Route path='/join-team' element={<JoinTeam />} />
           </Routes>
         </main>
         <Footer />
