@@ -25,6 +25,7 @@ import { useThemeStore } from './store/themeStore';
 import { useAuthStore } from './store/authStore';
 import AdminLogin from './pages/AdminLogin';
 import AppointmentDetails from './pages/AppointmentDetails';
+import DoctorDashboard from './pages/DoctorDashboard';
 
 function App() {
   const { isDarkMode, setTheme } = useThemeStore();
@@ -64,14 +65,9 @@ function App() {
             <Route path="/payment" element={<Payment />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/coupons" element={<Coupons />} />
-            <Route
-              path="/admin-login"
-              element={<AdminLogin />}
-            />
-            <Route
-              path="/admin"
-              element={<AdminDashboard />}
-            />
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/doctor" element={<DoctorDashboard />} />
             <Route path="/appointment-details" element={<AppointmentDetails />} />
             <Route path="/therapy-approaches" element={<TherapyApproaches />} />
             <Route path="/faq" element={<FAQ />} />

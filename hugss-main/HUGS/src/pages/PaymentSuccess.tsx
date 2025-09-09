@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import axios from 'axios';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Check, Edit, Send } from 'lucide-react'; // Replaced WhatsApp with Send
 
@@ -7,13 +8,39 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
   const { bookingData, paymentMethod, transactionId } = location.state || {};
 
+
+  const bookingSavedRef = useRef(false);
+  const [saveError, setSaveError] = useState('');
+
   useEffect(() => {
     if (!bookingData) {
-      navigate('/'); // Redirect if no booking data is provided
+      navigate('/');
+      return;
+    }
+    // Save booking to DB only once
+    if (!bookingSavedRef.current) {
+      bookingSavedRef.current = true;
+      axios.post('http://localhost:5000/book', {
+        fullName: bookingData.name,
+        phoneNumber: bookingData.phone,
+        email: bookingData.email,
+        statuss: bookingData.currentStatus,
+        doctor: bookingData.doctor,
+        language: bookingData.language,
+        concern: bookingData.problem,
+        date: bookingData.date,
+        time: bookingData.time,
+        couponCode: bookingData.couponCode
+      })
+        .catch((err) => setSaveError(err.response?.data?.error || 'Booking save failed'));
     }
   }, [bookingData, navigate]);
 
+
   if (!bookingData) return null; // Prevent rendering without valid data
+  if (saveError) {
+    return <div className="text-center text-red-500 py-8">{saveError}</div>;
+  }
 
   const doctorWhatsApp = '+1234567890'; // Replace with actual WhatsApp number
   const whatsappMessage = encodeURIComponent(

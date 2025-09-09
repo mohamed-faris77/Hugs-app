@@ -209,7 +209,7 @@ export default function Booking() {
     return newErrors;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError('');
     setSubmitSuccess('');
@@ -221,27 +221,8 @@ export default function Booking() {
       setSubmitSuccess('');
       return;
     }
-    // Only store booking and navigate if signed in
-    try {
-      const res = await axios.post('http://localhost:5000/book', {
-        fullName: formData.name,
-        phoneNumber: formData.phone,
-        email: formData.email,
-        statuss: formData.currentStatus,
-        doctor: formData.doctor,
-        language: formData.language,
-        concern: formData.problem,
-        date: formData.date,
-        time: formData.time,
-        couponCode: formData.couponCode
-      });
-      if (res.data && res.data.booking && isActuallyLoggedIn) {
-        setSubmitSuccess('');
-        navigate('/payment', { state: { bookingData: formData, discount } });
-      }
-    } catch (err: any) {
-      setSubmitError(err.response?.data?.error || 'Booking failed');
-    }
+    // Only navigate to payment, do not save booking yet
+    navigate('/payment', { state: { bookingData: formData, discount } });
   };
 
   return (

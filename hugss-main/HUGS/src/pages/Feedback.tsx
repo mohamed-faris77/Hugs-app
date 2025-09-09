@@ -113,6 +113,48 @@ export default function Feedback() {
 
 
 
+        {/* feedback outputs */}
+        <div className="mb-12">
+          <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}> Feedbacks</h2>
+          {allFeedback.length === 0 ? (
+            <div className="text-gray-400 text-center">No feedback yet.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {allFeedback.slice().reverse().slice(0, 9).map((item, idx) => {
+                const ratingEmoji = {
+                  very_happy: '😍',
+                  happy: '😁',
+                  neutral: '😐',
+                  unhappy: '🙁',
+                  very_unhappy: '😓',
+                }[item.rating] || '⭐';
+                // Avatar color
+                const avatarColor = [
+                  'bg-blue-500', 'bg-green-500', 'bg-pink-500', 'bg-yellow-500', 'bg-purple-500', 'bg-red-500', 'bg-indigo-500'
+                ][idx % 7];
+                return (
+                  <motion.div
+                    key={idx}
+                    className={`rounded-xl shadow-lg p-6 flex flex-col gap-3 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-white ${avatarColor}`}>{item.name?.[0]?.toUpperCase() || 'U'}</div>
+                      <div>
+                        <div className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{item.name}</div>
+                        <div className="text-xs text-gray-400">{ratingEmoji} {item.rating.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
+                      </div>
+                    </div>
+                    <div className={`text-base ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{item.message}</div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Feedback Form */}
         {!submitted ? (
           <motion.div
@@ -259,34 +301,6 @@ export default function Feedback() {
             </motion.button>
           </motion.div>
         )}
-        {/* Show all feedbacks below the form */}
-        <div className="mt-12">
-          <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Recent Feedback</h2>
-          {allFeedback.length === 0 ? (
-            <div className="text-gray-400 text-center">No feedback yet.</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                <thead className="bg-gray-50 dark:bg-gray-700">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Message</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Rating</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
-                  {allFeedback.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-gray-100 dark:hover:bg-gray-700">
-                      <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">{item.name}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{item.message}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{item.rating}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
       </div>
     </motion.div>
   );

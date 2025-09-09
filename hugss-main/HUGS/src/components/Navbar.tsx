@@ -8,7 +8,7 @@ import { useAuthStore } from '../store/authStore';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { isAdmin, logout, userLogout } = useAuthStore();
+  const { isAdmin, logout, userLogout, isDoctor, doctorUsername, doctorLogout } = useAuthStore();
   const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function Navbar() {
     };
   }, []);
 
-  const isLoggedIn = !!username;
+  const isLoggedIn = !!username && !isDoctor;
   return (
     <nav className="bg-primary shadow-lg sticky top-0 z-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,6 +53,20 @@ export default function Navbar() {
                   className="px-4 py-2 bg-secondary text-white rounded hover:bg-secondary-dark text-sm"
                   onClick={() => {
                     logout();
+                    window.location.href = '/admin-login';
+                  }}
+                >
+                  Logout
+                </button>
+              </>
+            ) : isDoctor ? (
+              // Doctor view - only theme toggle and logout
+              <>
+                <ThemeToggle />
+                <button
+                  className="px-4 py-2 bg-secondary text-white rounded hover:bg-secondary-dark text-sm"
+                  onClick={() => {
+                    doctorLogout();
                     window.location.href = '/admin-login';
                   }}
                 >
@@ -142,7 +156,21 @@ export default function Navbar() {
             className="md:hidden"
           >
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {isAdmin ? (
+              {isDoctor ? (
+                // Doctor mobile view - only theme toggle and logout
+                <>
+                  <ThemeToggle />
+                  <button
+                    className="block w-full text-left px-3 py-2 text-white hover:text-secondary"
+                    onClick={() => {
+                      doctorLogout();
+                      window.location.href = '/admin-login';
+                    }}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : isAdmin ? (
                 // Admin mobile view - only logout option
                 <>
                   <ThemeToggle />
