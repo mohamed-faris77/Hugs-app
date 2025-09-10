@@ -5,6 +5,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import pg from 'pg';
+import Razorpay from "razorpay";
+import crypto from 'crypto';
 // const express = require('express')
 // const dotenv = require('dotenv')
 // const cors = require('cors')
@@ -32,7 +34,13 @@ pool.connect().then(() => {
   console.log(err);
 })
 
-// --- Contact Endpoints ---
+// Initialize Razorpay instance
+const razorpay = new Razorpay({
+  key_id: process.env.Key_id,
+  key_secret: process.env.Key_secret,
+});
+
+
 // Save contact form submission
 app.post("/contact", async (req, res) => {
   const { name, email, subject, message } = req.body;
@@ -97,8 +105,6 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ error: "Login failed" });
 
   }
-
-
 })
 
 
@@ -229,7 +235,7 @@ app.get("/feedback/stats", async (req, res) => {
 
 // Test endpoint for feedback API
 app.get("/test-feedback", async (req, res) => {
-  console.log("🧪 Testing Feedback API Endpoints...");
+  console.log(" Testing Feedback API Endpoints...");
 
   const testFeedback = {
     name: "Test User",
@@ -240,20 +246,20 @@ app.get("/test-feedback", async (req, res) => {
 
   try {
     // Test 1: Insert test feedback
-    console.log("1️⃣ Testing feedback insertion...");
+    console.log(" Testing feedback insertion...");
     const insertResult = await pool.query(
       "INSERT INTO feedback (name, phone, message, rating, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *",
       [testFeedback.name, testFeedback.phone, testFeedback.message, testFeedback.rating]
     );
-    console.log("✅ Test feedback inserted:", insertResult.rows[0]);
+    console.log(" Test feedback inserted:", insertResult.rows[0]);
 
     // Test 2: Fetch all feedback
-    console.log("2️⃣ Testing feedback retrieval...");
+    console.log(" Testing feedback retrieval...");
     const fetchResult = await pool.query("SELECT * FROM feedback ORDER BY created_at DESC LIMIT 5");
-    console.log(`✅ Retrieved ${fetchResult.rows.length} feedback entries`);
+    console.log(` Retrieved ${fetchResult.rows.length} feedback entries`);
 
     // Test 3: Get feedback statistics
-    console.log("3️⃣ Testing feedback statistics...");
+    console.log("Testing feedback statistics...");
     const statsResult = await pool.query(`
       SELECT
         COUNT(*) as total_feedback,
@@ -270,7 +276,7 @@ app.get("/test-feedback", async (req, res) => {
     `);
 
     const stats = statsResult.rows[0];
-    console.log("✅ Feedback Statistics:", {
+    console.log(" Feedback Statistics:", {
       totalFeedback: parseInt(stats.total_feedback),
       averageRating: parseFloat(stats.average_rating || 0).toFixed(1),
       ratingBreakdown: {
@@ -298,7 +304,7 @@ app.get("/test-feedback", async (req, res) => {
     });
 
   } catch (error) {
-    console.log("❌ Test failed:", error);
+    console.log(" Test failed:", error);
     res.status(500).json({
       error: "Feedback API test failed",
       details: error.message
@@ -324,6 +330,55 @@ app.get("/health", (req, res) => {
     }
   });
 });
+
+// ✅ Create Razorpay Order
+app.post("/api/create-order", async (req, res) => {
+  try {
+    let { amount, currency = "INR", receipt } = req.body;
+    // amount is already in paise from frontend
+    const options = { amount, currency, receipt };
+    const order = await razorpay.orders.create(options);
+
+    // Save order to DB with correct amount
+    await pool.query(
+      "INSERT INTO payments (order_id, amount, currency, status) VALUES ($1, $2, $3, $4)",
+      [order.id, amount, currency, "created"]
+    );
+
+    res.json(order);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
+// ✅ Verify Payment Signature
+app.post("/api/verify-payment", async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+  const body = razorpay_order_id + "|" + razorpay_payment_id;
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.Key_secret)
+    .update(body.toString())
+    .digest("hex");
+
+  if (expectedSignature === razorpay_signature) {
+    await pool.query(
+      "UPDATE payments SET payment_id=$1, status=$2 WHERE order_id=$3",
+      [razorpay_payment_id, "paid", razorpay_order_id]
+    );
+    res.json({ success: true });
+  } else {
+    // Mark as failed if signature invalid
+    await pool.query(
+      "UPDATE payments SET status=$1 WHERE order_id=$2",
+      ["failed", razorpay_order_id]
+    );
+    res.status(400).json({ success: false, error: "Invalid signature" });
+  }
+});
+
+
 
 app.listen(5000, () => {
   console.log("🚀 Server is running on port 5000");

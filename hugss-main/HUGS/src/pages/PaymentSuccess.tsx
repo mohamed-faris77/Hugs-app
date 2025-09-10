@@ -17,8 +17,10 @@ export default function PaymentSuccess() {
       navigate('/');
       return;
     }
-    // Save booking to DB only once
-    if (!bookingSavedRef.current) {
+    // Use a unique key for this booking (phone+date+time)
+    const bookingKey = `booking_saved_${bookingData.phone}_${bookingData.date}_${bookingData.time}`;
+    const alreadySaved = sessionStorage.getItem(bookingKey);
+    if (!alreadySaved && !bookingSavedRef.current) {
       bookingSavedRef.current = true;
       axios.post('http://localhost:5000/book', {
         fullName: bookingData.name,
@@ -32,6 +34,9 @@ export default function PaymentSuccess() {
         time: bookingData.time,
         couponCode: bookingData.couponCode
       })
+        .then(() => {
+          sessionStorage.setItem(bookingKey, 'true');
+        })
         .catch((err) => setSaveError(err.response?.data?.error || 'Booking save failed'));
     }
   }, [bookingData, navigate]);
