@@ -20,14 +20,17 @@ function FeedbackModal({ open, onClose, feedback }: { open: boolean, onClose: ()
   );
 }
 
+
 export default function AdminDashboard() {
   const [selectedTab, setSelectedTab] = useState('appointments');
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [feedback, setFeedback] = useState([]);
   const [contact, setContact] = useState([]);
   const [activeClients, setActiveClients] = useState<number | null>(null);
   const [pendingCount, setPendingCount] = useState<number | null>(null);
+  const [revenue, setRevenue] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [viewFeedback, setViewFeedback] = useState<any | null>(null);
@@ -41,13 +44,21 @@ export default function AdminDashboard() {
         const bookingsRes = await axios.get('http://localhost:5000/bookings');
         setAppointments(bookingsRes.data.bookings || []);
 
+        // Fetch payments
+        try {
+          const paymentsRes = await axios.get('http://localhost:5000/payments');
+          setPayments(paymentsRes.data.payments || []);
+        } catch (paymentsError) {
+          setPayments([]);
+        }
+
         // Fetch feedback from API
         try {
           const feedbackRes = await axios.get('http://localhost:5000/feedback');
           setFeedback(feedbackRes.data.feedback || []);
         } catch (feedbackError) {
           console.log('Feedback fetch error:', feedbackError);
-          // If API fails, try localStorage as fallback
+          
           const storedFeedback = localStorage.getItem('feedback_submissions');
           if (storedFeedback) {
             setFeedback(JSON.parse(storedFeedback));
@@ -76,6 +87,14 @@ export default function AdminDashboard() {
           setPendingCount(pendingRes.data.pending);
         } catch (err) {
           setPendingCount(null);
+        }
+
+        // Fetch revenue
+        try {
+          const revenueRes = await axios.get('http://localhost:5000/dashboard/revenue');
+          setRevenue(revenueRes.data.revenue);
+        } catch (err) {
+          setRevenue(null);
         }
 
       } catch (err: any) {
@@ -125,7 +144,9 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500 dark:text-gray-400">Revenue</p>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">$12,480</h3>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {revenue !== null ? `₹${revenue}` : '—'}
+              </h3>
             </div>
             <DollarSign className="h-8 w-8 text-purple-600" />
           </div>
@@ -206,7 +227,25 @@ export default function AdminDashboard() {
                       <tr key={booking.id} className="hover:bg-gray-100 dark:hover:bg-gray-700">
                         <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">{booking.fullName || booking.fullname}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{booking.doctor || 'N/A'}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{booking.paymentStatus || 'N/A'}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">
+                          {/* Show payment status by matching booking to payment */}
+                          {(() => {
+                            const paymentsArr: any[] = payments as any[];
+                            const match = paymentsArr.find((p) => {
+                              return (
+                                p.phoneNumber === booking.phoneNumber &&
+                                p.amount &&
+                                booking.date &&
+                                booking.time &&
+                                p.status &&
+                                (p.status === 'paid' || p.status === 'failed')
+                              );
+                            });
+                            if (match && match.status === 'paid') return <span className="text-green-600">Successful</span>;
+                            if (match && match.status === 'failed') return <span className="text-red-600">Failed</span>;
+                            return <span className="text-gray-400">Failed</span>;
+                          })()}
+                        </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <button
                             className="text-purple-600 hover:underline cursor-pointer bg-transparent border-none outline-none"
@@ -215,6 +254,37 @@ export default function AdminDashboard() {
                             View
                           </button>
                         </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          ) : selectedTab === 'payments' ? (
+            <div className="overflow-x-auto">
+              {loading ? (
+                <div className="text-center py-8">Loading...</div>
+              ) : error ? (
+                <div className="text-center text-red-500 py-8">{error}</div>
+              ) : payments.length === 0 ? (
+                <div className="text-center py-8 text-gray-400 text-lg">No payments data yet.</div>
+              ) : (
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Order ID</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Amount (₹)</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Created At</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                    {payments.map((payment: any, idx: number) => (
+                      <tr key={payment.id || idx} className="hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-900 dark:text-white">{payment.order_id}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{(payment.amount / 100).toFixed(2)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{payment.status}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{payment.created_at ? new Date(payment.created_at).toLocaleString() : '-'}</td>
                       </tr>
                     ))}
                   </tbody>

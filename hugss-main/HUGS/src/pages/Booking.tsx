@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 import axios from 'axios';
 import { Calendar, Clock, Video, CreditCard } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Select from 'react-select';
 import { motion } from 'framer-motion';
 
@@ -55,17 +55,16 @@ const validCoupons = {
   'SPECIAL25': 25
 };
 
-// Custom styles for react-select with theme support
 const createSelectStyles = (isDarkMode: boolean) => ({
   control: (provided: any, state: any) => ({
     ...provided,
-    backgroundColor: isDarkMode ? '#374151' : '#ffffff', // gray-700 or white
-    borderColor: state.isFocused ? '#8b5cf6' : (isDarkMode ? '#4b5563' : '#d1d5db'), // gray-600 or gray-300
-    color: isDarkMode ? 'white' : '#374151', // white or gray-700
-    borderRadius: '0.375rem', // rounded-md
+    backgroundColor: isDarkMode ? '#374151' : '#ffffff', 
+    borderColor: state.isFocused ? '#8b5cf6' : (isDarkMode ? '#4b5563' : '#d1d5db'), 
+    color: isDarkMode ? 'white' : '#374151', 
+    borderRadius: '0.375rem',
     borderWidth: '1px',
-    minHeight: '2.5rem', // h-10
-    fontSize: '0.875rem', // text-sm
+    minHeight: '2.5rem', 
+    fontSize: '0.875rem',
     '&:hover': {
       borderColor: '#8b5cf6',
     },
@@ -87,52 +86,52 @@ const createSelectStyles = (isDarkMode: boolean) => ({
   option: (provided: any, state: any) => ({
     ...provided,
     backgroundColor: state.isSelected
-      ? '#8b5cf6' // purple-500
+      ? '#8b5cf6' 
       : state.isFocused
-        ? (isDarkMode ? '#4b5563' : '#f3f4f6') // gray-600 or gray-100
-        : (isDarkMode ? '#374151' : '#ffffff'), // gray-700 or white
-    color: state.isSelected ? 'white' : (isDarkMode ? 'white' : '#374151'), // white or gray-700
+        ? (isDarkMode ? '#4b5563' : '#f3f4f6') 
+        : (isDarkMode ? '#374151' : '#ffffff'), 
+    color: state.isSelected ? 'white' : (isDarkMode ? 'white' : '#374151'), 
     cursor: 'pointer',
     padding: '0.5rem 0.75rem',
-    fontSize: '0.875rem', // text-sm
+    fontSize: '0.875rem',
     '&:hover': {
-      backgroundColor: isDarkMode ? '#4b5563' : '#f3f4f6', // gray-600 or gray-100
+      backgroundColor: isDarkMode ? '#4b5563' : '#f3f4f6',
     },
     '&:active': {
-      backgroundColor: '#8b5cf6', // purple-500
+      backgroundColor: '#8b5cf6',
     },
   }),
   singleValue: (provided: any) => ({
     ...provided,
-    color: isDarkMode ? 'white' : '#374151', // white or gray-700
-    fontSize: '0.875rem', // text-sm
+    color: isDarkMode ? 'white' : '#374151', 
+    fontSize: '0.875rem', 
   }),
   placeholder: (provided: any) => ({
     ...provided,
-    color: isDarkMode ? '#9ca3af' : '#6b7280', // gray-400 or gray-500
-    fontSize: '0.875rem', // text-sm
+    color: isDarkMode ? '#9ca3af' : '#6b7280',
+    fontSize: '0.875rem',
   }),
   input: (provided: any) => ({
     ...provided,
-    color: isDarkMode ? 'white' : '#374151', // white or gray-700
-    fontSize: '0.875rem', // text-sm
+    color: isDarkMode ? 'white' : '#374151', 
+    fontSize: '0.875rem', 
   }),
   indicatorSeparator: (provided: any) => ({
     ...provided,
-    backgroundColor: isDarkMode ? '#4b5563' : '#d1d5db', // gray-600 or gray-300
+    backgroundColor: isDarkMode ? '#4b5563' : '#d1d5db', 
   }),
   dropdownIndicator: (provided: any, state: any) => ({
     ...provided,
-    color: state.isFocused ? '#8b5cf6' : (isDarkMode ? '#9ca3af' : '#6b7280'), // gray-400 or gray-500
+    color: state.isFocused ? '#8b5cf6' : (isDarkMode ? '#9ca3af' : '#6b7280'), 
     '&:hover': {
       color: '#8b5cf6',
     },
   }),
   clearIndicator: (provided: any) => ({
     ...provided,
-    color: isDarkMode ? '#9ca3af' : '#6b7280', // gray-400 or gray-500
+    color: isDarkMode ? '#9ca3af' : '#6b7280',
     '&:hover': {
-      color: isDarkMode ? '#6b7280' : '#374151', // gray-500 or gray-700
+      color: isDarkMode ? '#6b7280' : '#374151', 
     },
   }),
 });
@@ -140,9 +139,9 @@ const createSelectStyles = (isDarkMode: boolean) => ({
 export default function Booking() {
   const { isUserLoggedIn } = useAuthStore();
   const { isDarkMode } = useThemeStore();
-  // Only use isUserLoggedIn for authentication check
   const isActuallyLoggedIn = isUserLoggedIn && !!localStorage.getItem('username');
   const navigate = useNavigate();
+  const location = useLocation();
   const customSelectStyles = createSelectStyles(isDarkMode);
   const [formData, setFormData] = useState<BookingForm>({
     name: '',
@@ -157,7 +156,27 @@ export default function Booking() {
     couponCode: ''
   });
 
-  // Static doctor list from Faculty.tsx
+  // Edit mode state
+  const [isEditMode, setIsEditMode] = useState(false);
+  // Store original keys for PATCH
+  const [originalKeys, setOriginalKeys] = useState<{ phone: string; date: string; time: string } | null>(null);
+
+  useEffect(() => {
+    if (location.state && location.state.bookingData) {
+      setFormData({ ...location.state.bookingData });
+      setIsEditMode(true);
+      setOriginalKeys({
+        phone: location.state.bookingData.phone,
+        date: location.state.bookingData.date,
+        time: location.state.bookingData.time
+      });
+    } else {
+      setIsEditMode(false);
+      setOriginalKeys(null);
+    }
+  }, [location.state]);
+
+  // Static doctor list from Faculty.jsx
   const doctorOptions = [
     { value: 'Dr. Sarah Johnson', label: 'Dr. Sarah Johnson' },
     { value: 'Dr. Michael Chen', label: 'Dr. Michael Chen' },
@@ -209,7 +228,7 @@ export default function Booking() {
     return newErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError('');
     setSubmitSuccess('');
@@ -221,8 +240,33 @@ export default function Booking() {
       setSubmitSuccess('');
       return;
     }
-    // Only navigate to payment, do not save booking yet
-    navigate('/payment', { state: { bookingData: formData, discount } });
+    if (isEditMode && originalKeys) {
+      // PATCH update booking
+      try {
+        const res = await axios.patch('http://localhost:5000/book', {
+          fullName: formData.name,
+          phoneNumber: formData.phone,
+          email: formData.email,
+          statuss: formData.currentStatus,
+          doctor: formData.doctor,
+          language: formData.language,
+          concern: formData.problem,
+          date: formData.date,
+          time: formData.time,
+          couponCode: formData.couponCode,
+          originalPhoneNumber: originalKeys.phone,
+          originalDate: originalKeys.date,
+          originalTime: originalKeys.time
+        });
+        setSubmitSuccess('Booking updated successfully!');
+        setIsEditMode(false);
+        setOriginalKeys(null);
+      } catch (err: any) {
+        setSubmitError(err.response?.data?.error || 'Failed to update booking');
+      }
+    } else {
+      navigate('/payment', { state: { bookingData: formData, discount } });
+    }
   };
 
   return (
@@ -325,6 +369,7 @@ export default function Booking() {
                 </label>
                 <Select
                   options={statusOptions}
+                  value={statusOptions.find(opt => opt.value === formData.currentStatus) || null}
                   onChange={(option) => setFormData({ ...formData, currentStatus: option?.value || '' })}
                   className="mt-1"
                   placeholder="Select your current status"
@@ -340,6 +385,7 @@ export default function Booking() {
                 </label>
                 <Select
                   options={doctorOptions}
+                  value={doctorOptions.find(opt => opt.value === formData.doctor) || null}
                   onChange={(option) => setFormData({ ...formData, doctor: option?.value || '' })}
                   className="mt-1"
                   placeholder="Select a doctor"
@@ -354,6 +400,7 @@ export default function Booking() {
                 </label>
                 <Select
                   options={languages}
+                  value={languages.find(opt => opt.value === formData.language) || null}
                   onChange={(option) => setFormData({ ...formData, language: option?.value || '' })}
                   className="mt-1"
                   placeholder="Select your preferred language"
@@ -368,6 +415,7 @@ export default function Booking() {
                 </label>
                 <Select
                   options={problems}
+                  value={problems.find(opt => opt.value === formData.problem) || null}
                   onChange={(option) => setFormData({ ...formData, problem: option?.value || '' })}
                   className="mt-1"
                   placeholder="Select your concern"
@@ -405,7 +453,7 @@ export default function Booking() {
                       className={`flex items-center justify-center px-4 py-2 border rounded-md dark:border-gray-600 dark:text-gray-300 dark:hover:border-purple-400 ${formData.time === time
                         ? 'bg-primary text-white border-primary'
                         : 'border-gray-300 text-gray-700 hover:border-primary dark:bg-gray-700 dark:text-gray-300'
-                        }`}
+                        }${formData.time === time ? ' ring-2 ring-primary' : ''}`}
                     >
                       <Clock className="h-4 w-4 mr-2" />
                       {time}
@@ -456,7 +504,7 @@ export default function Booking() {
                       {discount > 0
                         ? <span>
                           <span className="line-through dark:text-gray-400">Rs 100</span>
-                          {' '}${80 - (80 * discount / 100)}
+                          {' '}Rs {Math.round(100 * (1 - discount / 100))}
                         </span>
                         : '100'} per session
                     </span>
@@ -470,7 +518,7 @@ export default function Booking() {
                 type="submit"
                 className="w-full bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors"
               >
-                Proceed to Payment
+                {isEditMode ? 'Update Booking' : 'Proceed to Payment'}
               </button>
             </form>
           </div>

@@ -1,4 +1,5 @@
 
+
 import { response } from 'express';
 import bcrypt from 'bcrypt';
 import express from 'express';
@@ -41,6 +42,21 @@ const razorpay = new Razorpay({
 });
 
 
+// Get total revenue (in rupees)
+//i have counted it in paise
+app.get("/dashboard/revenue", async (req, res) => {
+  try {
+    // Only sum successful payments
+    const result = await pool.query("SELECT COALESCE(SUM(amount),0) AS total_paise FROM payments WHERE status = 'paid'");
+    // Convert paise to rupees
+    const totalRupees = parseInt(result.rows[0].total_paise, 10) / 100;
+    res.json({ revenue: totalRupees });
+  } catch (error) {
+    console.log("Revenue fetch error:", error);
+    res.status(500).json({ error: "Failed to fetch revenue" });
+  }
+});
+
 // Save contact form submission
 app.post("/contact", async (req, res) => {
   const { name, email, subject, message } = req.body;
@@ -66,6 +82,41 @@ app.get("/contact", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch contact submissions" });
   }
 });
+
+// Update booking
+app.patch("/book", async (req, res) => {
+  const {
+    fullName,
+    phoneNumber,
+    email,
+    status,
+    doctor,
+    language,
+    concern,
+    date,
+    time,
+    couponCode,
+    originalPhoneNumber,
+    originalDate,
+    originalTime
+  } = req.body;
+
+  try {
+    const result = await pool.query(
+      `UPDATE bookings SET fullName=$1, phoneNumber=$2, email=$3, status=$4, doctor=$5, language=$6, concern=$7, date=$8, time=$9, couponCode=$10
+   WHERE phoneNumber=$11 AND date=$12 AND time=$13 RETURNING *`,
+      [fullName, phoneNumber, email, status, doctor, language, concern, date, time, couponCode, originalPhoneNumber, originalDate, originalTime]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Booking not found for update" });
+    }
+    res.json({ message: "Booking updated successfully", booking: result.rows[0] });
+  } catch (error) {
+    console.log("Booking update error:", error);
+    res.status(500).json({ error: "Booking update failed" });
+  }
+});
+
 
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
@@ -119,6 +170,19 @@ app.get("/bookings", async (req, res) => {
 });
 
 
+
+app.get("/payments", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM payments ORDER BY created_at DESC NULLS LAST, id DESC");
+    res.json({ payments: result.rows });
+  } catch (error) {
+    console.log("Fetch payments error:", error);
+    res.status(500).json({ error: "Failed to fetch payments" });
+  }
+});
+
+
+
 // Get total users ever registered
 app.get("/dashboard/active-clients", async (req, res) => {
   try {
@@ -131,13 +195,14 @@ app.get("/dashboard/active-clients", async (req, res) => {
 });
 
 // Get pending bookings count
+// Pending payments: count payments where status is not 'paid'
 app.get("/dashboard/pending", async (req, res) => {
   try {
-    const result = await pool.query("SELECT COUNT(*) AS pending_count FROM bookings WHERE LOWER(statuss) = 'pending'");
+    const result = await pool.query("SELECT COUNT(*) AS pending_count FROM payments WHERE LOWER(status) <> 'paid'");
     res.json({ pending: parseInt(result.rows[0].pending_count) });
   } catch (error) {
-    console.log("Pending bookings fetch error:", error);
-    res.status(500).json({ error: "Failed to fetch pending bookings" });
+    console.log("Pending payments fetch error:", error);
+    res.status(500).json({ error: "Failed to fetch pending payments" });
   }
 });
 
@@ -146,7 +211,7 @@ app.post("/book", async (req, res) => {
     fullName,
     phoneNumber,
     email,
-    statuss,
+    status,
     doctor,
     language,
     concern,
@@ -157,8 +222,8 @@ app.post("/book", async (req, res) => {
 
   try {
     const result = await pool.query(
-      "INSERT INTO bookings (fullName, phoneNumber, email, statuss, doctor, language, concern, date, time, couponCode) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *",
-      [fullName, phoneNumber, email, statuss, doctor, language, concern, date, time, couponCode]
+      "INSERT INTO bookings (fullName, phoneNumber, email, status, doctor, language, concern, date, time, couponCode) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *",
+      [fullName, phoneNumber, email, status, doctor, language, concern, date, time, couponCode]
     );
 
     res.json({ message: "Booking successful", booking: result.rows[0] });
@@ -331,18 +396,18 @@ app.get("/health", (req, res) => {
   });
 });
 
-// ✅ Create Razorpay Order
+//  Create Razorpay Order
 app.post("/api/create-order", async (req, res) => {
   try {
-    let { amount, currency = "INR", receipt } = req.body;
+    let { amount, currency = "INR", receipt, phoneNumber, date, time } = req.body;
     // amount is already in paise from frontend
     const options = { amount, currency, receipt };
     const order = await razorpay.orders.create(options);
 
-    // Save order to DB with correct amount
+    // Save order to DB with correct amount and booking reference
     await pool.query(
-      "INSERT INTO payments (order_id, amount, currency, status) VALUES ($1, $2, $3, $4)",
-      [order.id, amount, currency, "created"]
+      "INSERT INTO payments (order_id, amount, currency, status, phonenumber, date, time) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      [order.id, amount, currency, "created", phoneNumber, date, time]
     );
 
     res.json(order);
@@ -352,7 +417,7 @@ app.post("/api/create-order", async (req, res) => {
   }
 });
 
-// ✅ Verify Payment Signature
+//  Verify Payment Signature
 app.post("/api/verify-payment", async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
@@ -362,11 +427,25 @@ app.post("/api/verify-payment", async (req, res) => {
     .update(body.toString())
     .digest("hex");
 
+  // Find the payment record to get phoneNumber, date, time for booking update
+  const paymentRes = await pool.query(
+    "SELECT phonenumber, date, time FROM payments WHERE order_id = $1",
+    [razorpay_order_id]
+  );
+  const payment = paymentRes.rows[0];
+
   if (expectedSignature === razorpay_signature) {
     await pool.query(
       "UPDATE payments SET payment_id=$1, status=$2 WHERE order_id=$3",
       [razorpay_payment_id, "paid", razorpay_order_id]
     );
+    // Also update the booking status to 'success'
+    if (payment) {
+      await pool.query(
+        "UPDATE bookings SET status=$1 WHERE phonenumber=$2 AND date=$3 AND time=$4",
+        ["success", payment.phonenumber, payment.date, payment.time]
+      );
+    }
     res.json({ success: true });
   } else {
     // Mark as failed if signature invalid
@@ -374,12 +453,18 @@ app.post("/api/verify-payment", async (req, res) => {
       "UPDATE payments SET status=$1 WHERE order_id=$2",
       ["failed", razorpay_order_id]
     );
+    // Also update the booking status to 'failed'
+    if (payment) {
+      await pool.query(
+        "UPDATE bookings SET status=$1 WHERE phonenumber=$2 AND date=$3 AND time=$4",
+        ["failed", payment.phonenumber, payment.date, payment.time]
+      );
+    }
     res.status(400).json({ success: false, error: "Invalid signature" });
   }
 });
 
 
-
 app.listen(5000, () => {
-  console.log("🚀 Server is running on port 5000");
+  console.log(" Server is running on port 5000");
 })

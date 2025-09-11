@@ -275,6 +275,9 @@ export default function Payment() {
         amount: amountInPaise, // in paise
         currency: "INR",
         receipt: `receipt_${Date.now()}`,
+        phoneNumber: bookingData.phone,
+        date: bookingData.date,
+        time: bookingData.time,
       });
 
       const options = {
@@ -284,17 +287,30 @@ export default function Payment() {
         name: "My Booking App",
         description: "Booking Payment",
         order_id: data.id, // from backend
-        handler: function (response: any) {
-          toast.success("Payment Successful ");
-
-          // Navigate to success page
-          navigate("/payment-success", {
-            state: {
-              bookingData,
-              paymentMethod,
-              transactionId: response.razorpay_payment_id,
-            },
-          });
+        handler: async function (response: any) {
+          try {
+            // Call backend to verify payment
+            await axios.post("http://localhost:5000/api/verify-payment", {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              phoneNumber: bookingData.phone,
+              date: bookingData.date,
+              time: bookingData.time,
+              amount: amountInPaise
+            });
+            toast.success("Payment Successful");
+            // Navigate to success page
+            navigate("/payment-success", {
+              state: {
+                bookingData,
+                paymentMethod,
+                transactionId: response.razorpay_payment_id,
+              },
+            });
+          } catch (err) {
+            toast.error("Payment verification failed. Please contact support.");
+          }
         },
         prefill: {
           name: "Test User",
@@ -303,6 +319,12 @@ export default function Payment() {
         },
         theme: {
           color: "#7e22ce",
+        },
+        method: {
+          netbanking: true,
+          card: true,
+          upi: true, // Enable UPI
+          wallet: true,
         },
       };
 

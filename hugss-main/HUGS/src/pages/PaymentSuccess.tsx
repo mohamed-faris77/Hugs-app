@@ -56,22 +56,22 @@ export default function PaymentSuccess() {
     <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900 min-h-screen">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
         {/* Success Icon */}
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Check className="h-8 w-8 text-green-600" />
+        <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Check className="h-8 w-8 text-green-600 dark:text-green-400" />
         </div>
 
         {/* Title and Message */}
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
           Payment Successful!
         </h1>
-        <p className="text-gray-600 mb-8">
+        <p className="text-gray-600 dark:text-gray-300 mb-8">
           Your counseling session has been booked successfully.
         </p>
 
         {/* Booking Details */}
-        <div className="bg-gray-50 rounded-lg p-6 mb-8">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Booking Details</h2>
-          <div className="space-y-3 text-left">
+        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 mb-8">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Booking Details</h2>
+          <div className="space-y-3 text-left text-gray-700 dark:text-gray-200">
             <p><strong>Date:</strong> {bookingData.date}</p>
             <p><strong>Time:</strong> {bookingData.time}</p>
             <p><strong>Duration:</strong> 60 minutes</p>
@@ -87,7 +87,7 @@ export default function PaymentSuccess() {
             href={`https://wa.me/${doctorWhatsApp}?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+            className="flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
           >
             <Send className="h-5 w-5 mr-2" /> {/* Replaced WhatsApp icon */}
             Contact Doctor
@@ -96,7 +96,8 @@ export default function PaymentSuccess() {
           {/* Modify Booking */}
           <Link
             to="/booking"
-            className="flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            state={{ bookingData }}
+            className="flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <Edit className="h-5 w-5 mr-2" />
             Modify Booking
@@ -107,21 +108,21 @@ export default function PaymentSuccess() {
         <div className="space-y-4">
           <Link
             to="/resources"
-            className="block text-purple-600 hover:text-purple-700"
+            className="block text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
           >
             View Pre-session Resources
           </Link>
           <Link
             to="/"
-            className="block text-gray-500 hover:text-gray-600"
+            className="block text-gray-500 dark:text-gray-300 hover:text-gray-600 dark:hover:text-gray-100"
           >
             Return to Home
           </Link>
         </div>
 
         {/* Confirmation Message */}
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-blue-800">
+        <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
+          <p className="text-sm text-blue-800 dark:text-blue-200">
             A confirmation email has been sent to your email address with all the details.
             You can also save this page for your reference.
           </p>
