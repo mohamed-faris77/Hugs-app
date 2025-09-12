@@ -1,5 +1,3 @@
-
-
 import { response } from 'express';
 import bcrypt from 'bcrypt';
 import express from 'express';
@@ -7,6 +5,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import pg from 'pg';
 import Razorpay from "razorpay";
+import phonepeRouter from "./phonepe.js";
 import crypto from 'crypto';
 // const express = require('express')
 // const dotenv = require('dotenv')
@@ -17,8 +16,9 @@ dotenv.config()
 const app = express()
 // const pg = require('pg')
 const { Pool } = pg;
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
+app.use(phonepeRouter);
 //DB connection
 
 const pool = new Pool({

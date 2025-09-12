@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 import axios from 'axios';
@@ -51,19 +51,29 @@ const timeSlots = [
 
 const validCoupons = {
   'STUDENT20': 20,
-  'NEW10': 10,
-  'SPECIAL25': 25
+  'GROUP30': 30,
+  'FIRST25': 25
+};
+
+// Helper to fetch total users (happy customers)
+const fetchTotalUsers = async () => {
+  try {
+    const res = await axios.get('http://localhost:5000/dashboard/active-clients');
+    return res.data.activeClients || 0;
+  } catch {
+    return 0;
+  }
 };
 
 const createSelectStyles = (isDarkMode: boolean) => ({
   control: (provided: any, state: any) => ({
     ...provided,
-    backgroundColor: isDarkMode ? '#374151' : '#ffffff', 
-    borderColor: state.isFocused ? '#8b5cf6' : (isDarkMode ? '#4b5563' : '#d1d5db'), 
-    color: isDarkMode ? 'white' : '#374151', 
+    backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+    borderColor: state.isFocused ? '#8b5cf6' : (isDarkMode ? '#4b5563' : '#d1d5db'),
+    color: isDarkMode ? 'white' : '#374151',
     borderRadius: '0.375rem',
     borderWidth: '1px',
-    minHeight: '2.5rem', 
+    minHeight: '2.5rem',
     fontSize: '0.875rem',
     '&:hover': {
       borderColor: '#8b5cf6',
@@ -72,9 +82,9 @@ const createSelectStyles = (isDarkMode: boolean) => ({
   }),
   menu: (provided: any) => ({
     ...provided,
-    backgroundColor: isDarkMode ? '#374151' : '#ffffff', // gray-700 or white
-    border: `1px solid ${isDarkMode ? '#4b5563' : '#d1d5db'}`, // gray-600 or gray-300
-    borderRadius: '0.375rem', // rounded-md
+    backgroundColor: isDarkMode ? '#374151' : '#ffffff', 
+    border: `1px solid ${isDarkMode ? '#4b5563' : '#d1d5db'}`,
+    borderRadius: '0.375rem', 
     marginTop: '0.25rem',
     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     zIndex: 9999,
@@ -86,11 +96,11 @@ const createSelectStyles = (isDarkMode: boolean) => ({
   option: (provided: any, state: any) => ({
     ...provided,
     backgroundColor: state.isSelected
-      ? '#8b5cf6' 
+      ? '#8b5cf6'
       : state.isFocused
-        ? (isDarkMode ? '#4b5563' : '#f3f4f6') 
-        : (isDarkMode ? '#374151' : '#ffffff'), 
-    color: state.isSelected ? 'white' : (isDarkMode ? 'white' : '#374151'), 
+        ? (isDarkMode ? '#4b5563' : '#f3f4f6')
+        : (isDarkMode ? '#374151' : '#ffffff'),
+    color: state.isSelected ? 'white' : (isDarkMode ? 'white' : '#374151'),
     cursor: 'pointer',
     padding: '0.5rem 0.75rem',
     fontSize: '0.875rem',
@@ -103,8 +113,8 @@ const createSelectStyles = (isDarkMode: boolean) => ({
   }),
   singleValue: (provided: any) => ({
     ...provided,
-    color: isDarkMode ? 'white' : '#374151', 
-    fontSize: '0.875rem', 
+    color: isDarkMode ? 'white' : '#374151',
+    fontSize: '0.875rem',
   }),
   placeholder: (provided: any) => ({
     ...provided,
@@ -113,16 +123,16 @@ const createSelectStyles = (isDarkMode: boolean) => ({
   }),
   input: (provided: any) => ({
     ...provided,
-    color: isDarkMode ? 'white' : '#374151', 
-    fontSize: '0.875rem', 
+    color: isDarkMode ? 'white' : '#374151',
+    fontSize: '0.875rem',
   }),
   indicatorSeparator: (provided: any) => ({
     ...provided,
-    backgroundColor: isDarkMode ? '#4b5563' : '#d1d5db', 
+    backgroundColor: isDarkMode ? '#4b5563' : '#d1d5db',
   }),
   dropdownIndicator: (provided: any, state: any) => ({
     ...provided,
-    color: state.isFocused ? '#8b5cf6' : (isDarkMode ? '#9ca3af' : '#6b7280'), 
+    color: state.isFocused ? '#8b5cf6' : (isDarkMode ? '#9ca3af' : '#6b7280'),
     '&:hover': {
       color: '#8b5cf6',
     },
@@ -131,12 +141,31 @@ const createSelectStyles = (isDarkMode: boolean) => ({
     ...provided,
     color: isDarkMode ? '#9ca3af' : '#6b7280',
     '&:hover': {
-      color: isDarkMode ? '#6b7280' : '#374151', 
+      color: isDarkMode ? '#6b7280' : '#374151',
     },
   }),
 });
 
 export default function Booking() {
+  const [totalUsers, setTotalUsers] = useState<number>(0);
+  //  dynamic team count
+  // const [teamCount, setTeamCount] = useState<number>(3);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+
+  useEffect(() => {
+    let isMounted = true;
+    const poll = async () => {
+      const users = await fetchTotalUsers();
+      if (isMounted) setTotalUsers(users);
+    };
+    poll(); // initial fetch
+    pollingRef.current = setInterval(poll, 10000); 
+    return () => {
+      isMounted = false;
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, []);
   const { isUserLoggedIn } = useAuthStore();
   const { isDarkMode } = useThemeStore();
   const isActuallyLoggedIn = isUserLoggedIn && !!localStorage.getItem('username');
@@ -176,7 +205,6 @@ export default function Booking() {
     }
   }, [location.state]);
 
-  // Static doctor list from Faculty.jsx
   const doctorOptions = [
     { value: 'Dr. Sarah Johnson', label: 'Dr. Sarah Johnson' },
     { value: 'Dr. Michael Chen', label: 'Dr. Michael Chen' },
@@ -241,7 +269,6 @@ export default function Booking() {
       return;
     }
     if (isEditMode && originalKeys) {
-      // PATCH update booking
       try {
         const res = await axios.patch('http://localhost:5000/book', {
           fullName: formData.name,
@@ -559,12 +586,12 @@ export default function Booking() {
             <h3 className="text-lg font-medium text-primary dark:text-white">Our Team</h3>
             <div className="mt-4 grid grid-cols-2 gap-4 text-center">
               <div>
-                <p className="text-2xl font-bold text-primary dark:text-white">12</p>
+                <p className="text-2xl font-bold text-primary dark:text-white">3</p>
                 <p className="text-gray-600 dark:text-gray-300">Professional Counselors</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-primary dark:text-white">1000+</p>
-                <p className="text-gray-600 dark:text-gray-300">Happy Clients</p>
+                <p className="text-2xl font-bold text-primary dark:text-white">{totalUsers}</p>
+                <p className="text-gray-600 dark:text-gray-300">Happy Customers</p>
               </div>
             </div>
           </div>

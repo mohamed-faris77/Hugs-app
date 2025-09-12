@@ -53,7 +53,7 @@ export default function Navbar() {
                   className="px-4 py-2 bg-secondary text-white rounded hover:bg-secondary-dark text-sm"
                   onClick={() => {
                     logout();
-                    window.location.href = '/admin-login';
+                    window.location.href = '/';
                   }}
                 >
                   Logout
@@ -67,7 +67,7 @@ export default function Navbar() {
                   className="px-4 py-2 bg-secondary text-white rounded hover:bg-secondary-dark text-sm"
                   onClick={() => {
                     doctorLogout();
-                    window.location.href = '/admin-login';
+                    window.location.href = '/';
                   }}
                 >
                   Logout
@@ -123,7 +123,7 @@ export default function Navbar() {
                       onClick={() => {
                         localStorage.removeItem('username');
                         userLogout();
-                        window.location.reload();
+                        window.location.href = '/';
                       }}
                     >
                       Logout
@@ -164,7 +164,7 @@ export default function Navbar() {
                     className="block w-full text-left px-3 py-2 text-white hover:text-secondary"
                     onClick={() => {
                       doctorLogout();
-                      window.location.href = '/admin-login';
+                      window.location.href = '/';
                     }}
                   >
                     Logout
@@ -178,7 +178,7 @@ export default function Navbar() {
                     className="block w-full text-left px-3 py-2 text-white hover:text-secondary"
                     onClick={() => {
                       logout();
-                      window.location.href = '/admin-login';
+                      window.location.href = '/';
                     }}
                   >
                     Logout

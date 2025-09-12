@@ -1,3 +1,20 @@
+// Contact details modal component
+function ContactModal({ open, onClose, contact }: { open: boolean, onClose: () => void, contact: any }) {
+  if (!open || !contact) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-md w-full">
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Contact Message Details</h2>
+        <div className="mb-2"><span className="font-semibold">Name:</span> {contact.name}</div>
+        <div className="mb-2"><span className="font-semibold">Email:</span> {contact.email}</div>
+        <div className="mb-2"><span className="font-semibold">Subject:</span> {contact.subject}</div>
+        <div className="mb-2"><span className="font-semibold">Message:</span> {contact.message}</div>
+        <div className="mb-2"><span className="font-semibold">Date:</span> {contact.created_at ? new Date(contact.created_at).toLocaleString() : ''}</div>
+        <button onClick={onClose} className="mt-6 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">Close</button>
+      </div>
+    </div>
+  );
+}
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -22,6 +39,7 @@ function FeedbackModal({ open, onClose, feedback }: { open: boolean, onClose: ()
 
 
 export default function AdminDashboard() {
+  const [viewContact, setViewContact] = useState<any | null>(null);
   const [selectedTab, setSelectedTab] = useState('appointments');
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
@@ -58,7 +76,7 @@ export default function AdminDashboard() {
           setFeedback(feedbackRes.data.feedback || []);
         } catch (feedbackError) {
           console.log('Feedback fetch error:', feedbackError);
-          
+
           const storedFeedback = localStorage.getItem('feedback_submissions');
           if (storedFeedback) {
             setFeedback(JSON.parse(storedFeedback));
@@ -346,8 +364,8 @@ export default function AdminDashboard() {
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Name</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Email</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Subject</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Message</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">View</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
@@ -356,11 +374,19 @@ export default function AdminDashboard() {
                         <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">{item.name}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{item.email}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{item.subject}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{item.message}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">{item.created_at ? new Date(item.created_at).toLocaleString() : ''}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <button
+                            className="text-purple-600 hover:underline cursor-pointer bg-transparent border-none outline-none"
+                            onClick={() => setViewContact(item)}
+                          >
+                            View Message
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
+                  <ContactModal open={!!viewContact} onClose={() => setViewContact(null)} contact={viewContact} />
                 </table>
               )}
             </div>
