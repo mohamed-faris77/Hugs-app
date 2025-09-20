@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { CreditCard, Lock, Phone } from "lucide-react";
+import { CreditCard, Lock } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuthStore } from "../store/authStore";
 import axios from "axios";
 
-const UPI_APPS: { id: string; name: string; icon: string }[] = [
-  { id: "gpay", name: "Google Pay", icon: "🔵" },
-  { id: "phonepe", name: "PhonePe", icon: "💜" },
-  { id: "paytm", name: "Paytm", icon: "🔷" },
-];
+// UPI_APPS array commented out
+// const UPI_APPS: { id: string; name: string; icon: string }[] = [
+//   { id: "gpay", name: "Google Pay", icon: "🔵" },
+//   { id: "phonepe", name: "PhonePe", icon: "💜" },
+//   { id: "paytm", name: "Paytm", icon: "🔷" },
+// ];
 
 export default function Payment() {
   const location = useLocation();
@@ -112,32 +113,32 @@ export default function Payment() {
   };
 
 
-  // PhonePe UPI payment integration (placeholder)
-  const PHONEPE_MERCHANT_ID = import.meta.env.VITE_PHONEPE_MERCHANT_ID || "TEST-M23A2WT7NNW46_25091";
-  const PHONEPE_SECRET_KEY = import.meta.env.VITE_PHONEPE_SECRET_KEY || "NjQ4MDU3YWItZGRhYi00Yjc3LWE1MmUtZDM3Mzg5M2Q5YWYy";
+  // PhonePe UPI payment integration (commented out)
+  // const PHONEPE_MERCHANT_ID = import.meta.env.VITE_PHONEPE_MERCHANT_ID || "TEST-M23A2WT7NNW46_25091";
+  // const PHONEPE_SECRET_KEY = import.meta.env.VITE_PHONEPE_SECRET_KEY || "NjQ4MDU3YWItZGRhYi00Yjc3LWE1MmUtZDM3Mzg5M2Q5YWYy";
 
-  const handleUpiPayment = async () => {
-    setLoading(true);
-    try {
-      const { data } = await axios.post("http://localhost:5000/api/phonepe/initiate", {
-        amount: amountInPaise,
-        phoneNumber: bookingData.phone,
-        date: bookingData.date,
-        time: bookingData.time,
-      });
-      // PhonePe returns a redirect URL in data.data.instrumentResponse.redirectInfo.url
-      const redirectUrl = data?.data?.instrumentResponse?.redirectInfo?.url;
-      if (redirectUrl) {
-        window.location.href = redirectUrl;
-      } else {
-        toast.error("Failed to get PhonePe payment URL.");
-      }
-    } catch (err) {
-      toast.error("PhonePe payment initiation failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleUpiPayment = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const { data } = await axios.post("http://localhost:5000/api/phonepe/initiate", {
+  //       amount: amountInPaise,
+  //       phoneNumber: bookingData.phone,
+  //       date: bookingData.date,
+  //       time: bookingData.time,
+  //     });
+  //     // PhonePe returns a redirect URL in data.data.instrumentResponse.redirectInfo.url
+  //     const redirectUrl = data?.data?.instrumentResponse?.redirectInfo?.url;
+  //     if (redirectUrl) {
+  //       window.location.href = redirectUrl;
+  //     } else {
+  //       toast.error("Failed to get PhonePe payment URL.");
+  //     }
+  //   } catch (err) {
+  //     toast.error("PhonePe payment initiation failed.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900 min-h-screen">
@@ -237,13 +238,14 @@ export default function Payment() {
           >
             {loading ? "Processing..." : "Proceed with Card"}
           </button>
-          <button
+          {/* UPI button commented out */}
+          {/* <button
             onClick={handleUpiPayment}
             disabled={loading}
             className="w-full btn-secondary border border-purple-600 text-purple-700 dark:text-purple-300"
           >
             Proceed with UPI
-          </button>
+          </button> */}
         </div>
 
         <div className="mt-6 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">

@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import pg from 'pg';
 import Razorpay from "razorpay";
-import phonepeRouter from "./phonepe.js";
+// import phonepeRouter from "./phonepe.js";
 import crypto from 'crypto';
 // const express = require('express')
 // const dotenv = require('dotenv')
@@ -18,21 +18,37 @@ const app = express()
 const { Pool } = pg;
 app.use(cors());
 app.use(express.json());
-app.use(phonepeRouter);
-//DB connection
+// app.use(phonepeRouter);
+// Local PostgreSQL connection (commented out)
+// const pool = new Pool({
+//   user: process.env.DB_USER,
+//   host: process.env.DB_HOST,
+//   database: process.env.DB_NAME,
+//   password: process.env.DB_PASS,
+//   port: process.env.DB_PORT,
+// })
 
+// pool.connect().then(() => {
+//   console.log(" DB Connected");
+// }).catch((err) => {
+//   console.log(err);
+// })
+
+
+// Supabase Database connection using individual env vars
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
   password: process.env.DB_PASS,
   port: process.env.DB_PORT,
+  ssl: { rejectUnauthorized: false } // Supabase requires SSL
 })
 
 pool.connect().then(() => {
-  console.log(" DB Connected");
+  console.log(" Supabase DB Connected Successfully");
 }).catch((err) => {
-  console.log(err);
+  console.log("Database connection error:", err);
 })
 
 // Initialize Razorpay instance
