@@ -14,6 +14,7 @@ import crypto from 'crypto';
 
 dotenv.config()
 const app = express()
+const port = process.env.PORT || 5000;
 // const pg = require('pg')
 const { Pool } = pg;
 app.use(cors());
@@ -481,6 +482,6 @@ app.post("/api/verify-payment", async (req, res) => {
 });
 
 
-app.listen(5000, () => {
-  console.log(" Server is running on port 5000");
+app.listen(port, () => {
+  console.log(` Server is running on port ${port}` );
 })
