@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ESNext",  // Target modern JavaScript
+    "module": "ESNext",  // Use ES modules
+    "moduleResolution": "Node",  // Use Node resolution for modules
+    "jsx": "react-jsx",  // React JSX transform
+    "strict": true,  // Enable strict type checking
+    "esModuleInterop": true,  // Allow default imports from non-ES modules
+    "skipLibCheck": true,  // Skip type checking of declaration files
+    "forceConsistentCasingInFileNames": true,  // Ensure consistent file casing
+    "baseUrl": "./",  // Set base directory for resolving modules
+    "paths": {
+      "@/*": ["src/*"]  // Path alias for cleaner imports
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],  // Include TypeScript and JSX files
+  "exclude": ["node_modules", "dist"]  // Exclude node_modules and dist folders
+}
