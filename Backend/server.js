@@ -22,14 +22,31 @@ import { errorHandler } from './middleware/errorHandler.js';
 const app = express();
 
 app.use(express.json());
+
+// ✅ Safe, production-grade CORS setup
+const allowedOrigins = [
+  'https://hugsapp.vercel.app', // your frontend on Vercel
+  'http://localhost:5173',      // local development
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || '*', // Allow your frontend domain
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
-// Routes
+// ✅ Routes
 app.use('/api/payment', paymentRoutes);
 app.use('/contact', contactRoutes);
 app.use('/dashboard', dashboardRoutes);
@@ -38,13 +55,9 @@ app.use('/', bookingRoutes);
 app.use('/', authRoutes);
 app.use('/', feedbackRoutes);
 
-// Error handling middleware
+// ✅ Error handling middleware
 app.use(errorHandler);
 
-// app.listen(port, () => {
-//   console.log(`🚀 Server is running on port ${port}`);
-// });
-
-
-// ✅ IMPORTANT: Export the app instead of app.listen()
+// ❌ No app.listen() on Vercel (handled automatically)
+// ✅ Export the app
 export default app;
