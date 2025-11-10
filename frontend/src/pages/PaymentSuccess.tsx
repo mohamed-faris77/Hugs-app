@@ -22,7 +22,7 @@ export default function PaymentSuccess() {
     const alreadySaved = sessionStorage.getItem(bookingKey);
     if (!alreadySaved && !bookingSavedRef.current) {
       bookingSavedRef.current = true;
-      axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/book`, {
+      axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/book`, {
         fullName: bookingData.name,
         phoneNumber: bookingData.phone,
         email: bookingData.email,

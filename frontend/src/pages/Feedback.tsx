@@ -41,7 +41,7 @@ export default function Feedback() {
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/feedback`);
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/feedback`);
         if (res.ok) {
           const data = await res.json();
           setAllFeedback(data.feedback || []);
@@ -54,7 +54,7 @@ export default function Feedback() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/feedback`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

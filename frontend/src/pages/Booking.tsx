@@ -58,7 +58,7 @@ const validCoupons = {
 // Helper to fetch total users (happy customers)
 const fetchTotalUsers = async () => {
   try {
-    const res = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/dashboard/active-clients`);
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/dashboard/active-clients`);
     return res.data.activeClients || 0;
   } catch {
     return 0;
@@ -82,9 +82,9 @@ const createSelectStyles = (isDarkMode: boolean) => ({
   }),
   menu: (provided: any) => ({
     ...provided,
-    backgroundColor: isDarkMode ? '#374151' : '#ffffff', 
+    backgroundColor: isDarkMode ? '#374151' : '#ffffff',
     border: `1px solid ${isDarkMode ? '#4b5563' : '#d1d5db'}`,
-    borderRadius: '0.375rem', 
+    borderRadius: '0.375rem',
     marginTop: '0.25rem',
     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     zIndex: 9999,
@@ -160,7 +160,7 @@ export default function Booking() {
       if (isMounted) setTotalUsers(users);
     };
     poll(); // initial fetch
-    pollingRef.current = setInterval(poll, 10000); 
+    pollingRef.current = setInterval(poll, 10000);
     return () => {
       isMounted = false;
       if (pollingRef.current) clearInterval(pollingRef.current);
@@ -270,7 +270,7 @@ export default function Booking() {
     }
     if (isEditMode && originalKeys) {
       try {
-        const res = await axios.patch(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/book`, {
+        const res = await axios.patch(`${import.meta.env.VITE_BACKEND_BASE_URL}/book`, {
           fullName: formData.name,
           phoneNumber: formData.phone,
           email: formData.email,

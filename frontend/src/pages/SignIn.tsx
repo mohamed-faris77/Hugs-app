@@ -22,7 +22,7 @@ const SignIn = () => {
       return;
     }
     try {
-      const res = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/login`, { username, password });
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/login`, { username, password });
       if (res.data && res.data.user) {
         localStorage.setItem('username', res.data.user.username);
         window.dispatchEvent(new Event('usernameChanged'));

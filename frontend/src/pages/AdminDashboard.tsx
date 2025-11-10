@@ -59,13 +59,13 @@ export default function AdminDashboard() {
       setError('');
       try {
         // Fetch bookings (primary source for appointments and derived dashboard metrics)
-        const bookingsRes = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/bookings`);
+        const bookingsRes = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/bookings`);
         const bookings = bookingsRes.data.bookings || [];
         setAppointments(bookings);
 
         // Fetch payments (backend exposes GET /payments)
         try {
-          const paymentsRes = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/payments`);
+          const paymentsRes = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/payments`);
           setPayments(paymentsRes.data.payments || []);
         } catch (paymentsError) {
           console.log('Payments fetch error:', paymentsError);
@@ -74,7 +74,7 @@ export default function AdminDashboard() {
 
         // Fetch feedback from API (this endpoint exists)
         try {
-          const feedbackRes = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/feedback`);
+          const feedbackRes = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/feedback`);
           setFeedback(feedbackRes.data.feedback || []);
         } catch (feedbackError) {
           console.log('Feedback fetch error:', feedbackError);
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
 
         // Fetch contact submissions (backend exposes GET /contact)
         try {
-          const contactRes = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/contact`);
+          const contactRes = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/contact`);
           setContact(contactRes.data.contact || []);
         } catch (contactError) {
           console.log('Contact fetch error:', contactError);
@@ -108,7 +108,7 @@ export default function AdminDashboard() {
 
         // Fetch revenue (this endpoint exists in backend)
         try {
-          const revenueRes = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/dashboard/revenue`);
+          const revenueRes = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/dashboard/revenue`);
           setRevenue(revenueRes.data.revenue);
         } catch (err) {
           setRevenue(null);

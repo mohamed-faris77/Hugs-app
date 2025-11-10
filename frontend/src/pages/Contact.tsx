@@ -33,7 +33,7 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/contact`, formData);
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/contact`, formData);
       if (res.data && res.data.message) {
         toast.success('Message sent successfully!');
         setFormData(prev => ({ ...prev, subject: '', message: '' }));

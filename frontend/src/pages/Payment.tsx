@@ -44,7 +44,7 @@ export default function Payment() {
       setLoading(true);
 
       // Ask backend to create an order with discounted amount
-      const { data } = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/payment/create-order`, {
+      const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/payment/create-order`, {
         amount: amountInPaise, // in paise
         currency: "INR",
         receipt: `receipt_${Date.now()}`,
@@ -63,7 +63,7 @@ export default function Payment() {
         handler: async function (response: any) {
           try {
             // Call backend to verify payment
-            await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/payment/verify-payment`, {
+            await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/payment/verify-payment`, {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
@@ -128,7 +128,7 @@ export default function Payment() {
   // const handleUpiPayment = async () => {
   //   setLoading(true);
   //   try {
-  //     const { data } = await axios.post("`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/phonepe/initiate`", {
+  //     const { data } = await axios.post("`${import.meta.env.VITE_BACKEND_BASE_URL}/api/phonepe/initiate`", {
   //       amount: amountInPaise,
   //       phoneNumber: bookingData.phone,
   //       date: bookingData.date,

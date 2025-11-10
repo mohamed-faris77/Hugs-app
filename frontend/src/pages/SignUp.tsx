@@ -19,7 +19,7 @@ const SignUp = () => {
     setSuccess('');
     setLoading(true);
     try {
-      const res = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/register`, { username, password });
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/register`, { username, password });
       if (res.data && res.data.message) {
         setSuccess('Registration successful! You can now sign in.');
         userLogin();

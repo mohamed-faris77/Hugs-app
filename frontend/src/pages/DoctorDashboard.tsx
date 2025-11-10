@@ -32,7 +32,7 @@ export default function DoctorDashboard() {
       return;
     }
     setLoading(true);
-    axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/bookings`)
+    axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/bookings`)
       .then(res => {
         const all = res.data.bookings || [];
         // Use doctorUsername for filtering
