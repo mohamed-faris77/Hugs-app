@@ -25,7 +25,7 @@ app.use(express.json());
 
 // ✅ Safe, production-grade CORS setup
 const allowedOrigins = [
-  'https://hugsapp.vercel.app', // your frontend on Vercel
+  'https://hugsapp.vercel.app', // production frontend
   'http://localhost:5173',      // local development
 ];
 
@@ -58,6 +58,8 @@ app.use('/', feedbackRoutes);
 // ✅ Error handling middleware
 app.use(errorHandler);
 
-// ❌ No app.listen() on Vercel (handled automatically)
-// ✅ Export the app
-export default app;
+// ✅ Listen on Render’s assigned port
+const port = process.env.PORT || 5000;
+app.listen(port, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${port}`);
+});
