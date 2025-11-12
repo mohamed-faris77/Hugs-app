@@ -47,5 +47,6 @@ const connectWithRetry = async (retries = 5) => {
 
 connectWithRetry();
 
-// Export as NAMED export to match all models
+// Export BOTH: named AND default
 export { pool };
+export default pool;  // ← This allows `import pool from ...`
