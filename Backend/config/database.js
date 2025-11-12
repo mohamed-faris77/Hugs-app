@@ -1,22 +1,23 @@
+// Backend/config/database.js
 import pg from 'pg';
 import dotenv from 'dotenv';
 import dns from 'dns';
 
+// ✅ Load .env early
 dotenv.config();
 
-// ✅ Force Node to prefer IPv4 first (Render fix)
+// ✅ Force Node to prefer IPv4 (Render fix)
 dns.setDefaultResultOrder('ipv4first');
 
 const { Pool } = pg;
 
-// ✅ Create the PostgreSQL connection pool
-export const pool = new Pool({
+const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false,
   },
-  connectionTimeoutMillis: 10000, // 10 seconds
-  idleTimeoutMillis: 30000, // 30 seconds
+  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: 30000,
   max: 20,
   allowExitOnIdle: true,
 });
@@ -26,7 +27,7 @@ pool.on('error', (err) => {
   console.error('❌ Unexpected error on idle client:', err.message);
 });
 
-// ✅ Retry connection logic
+// ✅ Retry logic for connection
 const connectWithRetry = async (retries = 5) => {
   for (let i = 0; i < retries; i++) {
     try {
