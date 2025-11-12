@@ -1,12 +1,11 @@
-// Backend/config/database.js
 import pg from 'pg';
 import dotenv from 'dotenv';
 import dns from 'dns';
 
-// ✅ Load .env early
+// Load .env early
 dotenv.config();
 
-// ✅ Force Node to prefer IPv4 (Render fix)
+// Force Node to prefer IPv4 (Render fix)
 dns.setDefaultResultOrder('ipv4first');
 
 const { Pool } = pg;
@@ -22,23 +21,23 @@ const pool = new Pool({
   allowExitOnIdle: true,
 });
 
-// ✅ Log pool errors
+// Log pool errors
 pool.on('error', (err) => {
-  console.error('❌ Unexpected error on idle client:', err.message);
+  console.error('Unexpected error on idle client:', err.message);
 });
 
-// ✅ Retry logic for connection
+// Retry logic for connection
 const connectWithRetry = async (retries = 5) => {
   for (let i = 0; i < retries; i++) {
     try {
       const client = await pool.connect();
-      console.log('✅ Database connected successfully!');
+      console.log('Database connected successfully!');
       client.release();
       return;
     } catch (err) {
-      console.error(`❌ Database connection attempt ${i + 1} failed: ${err.message}`);
+      console.error(`Database connection attempt ${i + 1} failed: ${err.message}`);
       if (i === retries - 1) {
-        console.error('❌ All connection attempts failed. Exiting...');
+        console.error('All connection attempts failed. Exiting...');
         process.exit(1);
       }
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -48,4 +47,5 @@ const connectWithRetry = async (retries = 5) => {
 
 connectWithRetry();
 
-export default pool;
+// Export as NAMED export to match all models
+export { pool };
